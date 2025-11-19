@@ -19,11 +19,17 @@
     </div>
 
     <!-- Contenido del Menú -->
-    <div v-else-if="restaurante">
+    <div v-else-if="restaurante" class="main-content">
       <!-- Header del Restaurante -->
       <div class="restaurante-header">
         <div class="header-content">
-          <h1>{{ restaurante.nombre }}</h1>
+          <div class="header-top">
+            <h1>{{ restaurante.nombre }}</h1>
+            <div v-if="tieneProductosDeEsteRestaurante" class="carrito-activo-badge">
+              <span class="badge-icon">🛒</span>
+              Tienes {{ totalItemsDeEsteRestaurante }} items en tu pedido
+            </div>
+          </div>
           <div class="restaurante-info">
             <span class="info-badge">
               <span class="icon">📍</span> {{ restaurante.direccion }}
@@ -38,6 +44,17 @@
               <span class="status-dot"></span>
               {{ restaurante.estado }}
             </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aviso de múltiples restaurantes -->
+      <div v-if="tieneProductosDeOtrosRestaurantes" class="aviso-otros-restaurantes">
+        <div class="aviso-content">
+          <span class="aviso-icon">ℹ️</span>
+          <div class="aviso-text">
+            <strong>Tu pedido actual incluye productos de otros restaurantes</strong>
+            <p>Puedes seguir añadiendo productos de este restaurante a tu pedido existente</p>
           </div>
         </div>
       </div>
@@ -78,7 +95,10 @@
             v-for="producto in productosFiltrados" 
             :key="producto.id"
             class="producto-card"
-            :class="{ 'no-disponible': !producto.disponible }"
+            :class="{ 
+              'no-disponible': !producto.disponible, 
+              'en-carrito': estaEnCarrito(producto.id) 
+            }"
           >
             <!-- Imagen del Producto -->
             <div class="producto-imagen">
@@ -96,6 +116,11 @@
               <div v-if="!producto.disponible" class="badge-no-disponible">
                 No disponible
               </div>
+              
+              <!-- Badge de producto en carrito -->
+              <div v-if="estaEnCarrito(producto.id)" class="badge-en-carrito">
+                En pedido: {{ cantidadEnCarrito(producto.id) }}
+              </div>
             </div>
 
             <!-- Información del Producto -->
@@ -107,10 +132,36 @@
               
               <p class="producto-descripcion">{{ producto.descripcion }}</p>
               
-              <div class="producto-categoria">
-                <span class="categoria-tag">
-                  Añadir
-                </span>
+              <!-- Controles de Cantidad -->
+              <div class="producto-controls" v-if="producto.disponible">
+                <div class="cantidad-controls">
+                  <button 
+                    @click="decrementarCantidad(producto)" 
+                    class="cantidad-btn"
+                    :disabled="getCantidadProducto(producto.id) === 0"
+                  >
+                    -
+                  </button>
+                  <span class="cantidad-display">{{ getCantidadProducto(producto.id) }}</span>
+                  <button 
+                    @click="incrementarCantidad(producto)" 
+                    class="cantidad-btn"
+                  >
+                    +
+                  </button>
+                </div>
+                <button 
+                  @click="agregarAlCarrito(producto)" 
+                  class="btn-agregar"
+                  :disabled="getCantidadProducto(producto.id) === 0"
+                >
+                  <span class="icon-cart">🛒</span>
+                  {{ estaEnCarrito(producto.id) ? 'Actualizar' : 'Añadir al pedido' }}
+                </button>
+              </div>
+              
+              <div v-else class="producto-no-disponible">
+                <span class="no-disponible-text">Producto no disponible</span>
               </div>
             </div>
           </div>
@@ -124,26 +175,42 @@
         </div>
       </div>
     </div>
+
+    <!-- Componente del Carrito Reutilizable -->
+    <CarritoSidebar
+      :abierto="carritoVisible"
+      @abrir="onCarritoAbierto"
+      @cerrar="onCarritoCerrado"
+      @realizar-pedido="realizarPedido"
+    />
   </div>
 </template>
 
 <script>
 import { getRestaurante } from '@/services/catalogoService';
 import { useRouter, useRoute } from 'vue-router';
+import { useCarritoStore } from '@/stores/carritoStore';
+import CarritoSidebar from '@/components/cliente/Carrito.vue';
 
 export default {
   name: 'RestauranteMenu',
+  components: {
+    CarritoSidebar
+  },
   setup() {
     const router = useRouter();
     const route = useRoute();
-    return { router, route };
+    const carritoStore = useCarritoStore();
+    return { router, route, carritoStore };
   },
   data() {
     return {
       restaurante: null,
       loading: true,
       error: null,
-      categoriaSeleccionada: null
+      categoriaSeleccionada: null,
+      carritoVisible: false,
+      cantidades: {}
     };
   },
   computed: {
@@ -156,6 +223,30 @@ export default {
       
       return this.restaurante.productos.filter(
         producto => producto.categoria_id === this.categoriaSeleccionada
+      );
+    },
+    
+    tieneProductosDeEsteRestaurante() {
+      return this.carritoStore.items.some(item => 
+        item.restaurante.id === this.restaurante?.id
+      );
+    },
+    
+    totalItemsDeEsteRestaurante() {
+      return this.carritoStore.items
+        .filter(item => item.restaurante.id === this.restaurante?.id)
+        .reduce((total, item) => total + item.cantidad, 0);
+    },
+    
+    tieneProductosDeOtrosRestaurantes() {
+      return this.carritoStore.items.some(item => 
+        item.restaurante.id !== this.restaurante?.id
+      );
+    },
+    
+    otrosRestaurantesEnCarrito() {
+      return this.carritoStore.restaurantesEnCarrito.filter(
+        restaurante => restaurante.id !== this.restaurante?.id
       );
     }
   },
@@ -171,6 +262,7 @@ export default {
         const restauranteId = this.route.params.id;
         const response = await getRestaurante(restauranteId);
         this.restaurante = response.data;
+        
       } catch (error) {
         console.error('Error al cargar el restaurante:', error);
         this.error = 'No se pudo cargar el menú del restaurante. Por favor, intenta de nuevo.';
@@ -178,31 +270,118 @@ export default {
         this.loading = false;
       }
     },
+    
     volver() {
-      // Opción 1: Navegar por nombre de ruta
       this.router.push({ name: 'Restaurantes' });
-      
-      // Opción 2: Navegar por path directo
-      // this.router.push('/restaurantes');
-      
-      // Opción 3: Volver atrás en el historial
-      // this.router.back();
     },
+    
     getNombreCategoria(categoriaId) {
       if (!this.restaurante || !this.restaurante.categorias) return '';
       const categoria = this.restaurante.categorias.find(c => c.id === categoriaId);
       return categoria ? categoria.nombre : 'Sin categoría';
     },
+    
     getImagenUrl(imagen) {
-      // Ajusta esta URL según tu configuración de backend
       return `http://localhost:8000/storage/${imagen}`;
     },
+    
     handleImageError(event) {
       event.target.style.display = 'none';
       event.target.parentElement.innerHTML = '<div class="imagen-placeholder"><span class="placeholder-icon">🍽️</span></div>';
     },
+    
     formatPrice(precio) {
       return parseFloat(precio).toFixed(2);
+    },
+    
+    // Métodos para manejar las cantidades temporales
+    getCantidadProducto(productoId) {
+      return this.cantidades[productoId] || this.cantidadEnCarrito(productoId) || 0;
+    },
+    
+    incrementarCantidad(producto) {
+      if (!this.cantidades[producto.id]) {
+        this.cantidades[producto.id] = this.cantidadEnCarrito(producto.id) || 0;
+      }
+      this.cantidades[producto.id]++;
+    },
+    
+    decrementarCantidad(producto) {
+      if (!this.cantidades[producto.id]) {
+        this.cantidades[producto.id] = this.cantidadEnCarrito(producto.id) || 0;
+      }
+      if (this.cantidades[producto.id] > 0) {
+        this.cantidades[producto.id]--;
+      }
+    },
+    
+    // Métodos para el carrito único
+    agregarAlCarrito(producto) {
+      const cantidad = this.getCantidadProducto(producto.id);
+      
+      if (cantidad <= 0) {
+        alert('Por favor, selecciona al menos 1 producto');
+        return;
+      }
+      
+      this.carritoStore.agregarProducto(
+        producto, 
+        cantidad, 
+        {
+          id: this.restaurante.id,
+          nombre: this.restaurante.nombre,
+          direccion: this.restaurante.direccion,
+          telefono: this.restaurante.telefono
+        }
+      );
+      
+      // Resetear la cantidad temporal
+      this.cantidades[producto.id] = 0;
+      
+      // Mostrar el carrito automáticamente
+      this.carritoVisible = true;
+    },
+    
+    estaEnCarrito(productoId) {
+      return this.carritoStore.productoEnCarrito(productoId);
+    },
+    
+    cantidadEnCarrito(productoId) {
+      return this.carritoStore.cantidadProducto(productoId);
+    },
+    
+    // Métodos para eventos del carrito
+    onCarritoAbierto() {
+      this.carritoVisible = true;
+    },
+    
+    onCarritoCerrado() {
+      this.carritoVisible = false;
+    },
+    
+    // Métodos para realizar pedidos
+    realizarPedido(pedidoData) {
+      console.log('Datos del pedido completo:', pedidoData);
+      
+      const numRestaurantes = pedidoData.restaurantes.length;
+      let mensaje = `¡Pedido realizado con éxito!\n\n`;
+      
+      if (numRestaurantes > 1) {
+        mensaje += `Tu pedido incluye productos de ${numRestaurantes} restaurantes:\n`;
+        pedidoData.restaurantes.forEach(rest => {
+          mensaje += `• ${rest.nombre}\n`;
+        });
+        mensaje += `\n`;
+      }
+      
+      mensaje += `Total: Bs. ${this.formatPrice(pedidoData.total)}\n\n`;
+      mensaje += `Gracias por tu compra.`;
+      
+      alert(mensaje);
+      
+      // Limpiar carrito después del pedido
+      this.carritoStore.limpiarCarrito();
+      this.carritoVisible = false;
     }
   }
 };
@@ -210,10 +389,18 @@ export default {
 
 <style scoped>
 .menu-container {
-
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
+  position: relative;
+}
+
+.main-content {
+  transition: transform 0.3s ease;
+}
+
+.carrito-abierto .main-content {
+  transform: translateX(-20px);
 }
 
 /* Botón Volver */
@@ -506,18 +693,85 @@ export default {
   line-height: 1.5;
 }
 
-.producto-categoria {
+/* Controles de cantidad y añadir al carrito */
+.producto-controls {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-top: 1rem;
 }
 
-.categoria-tag {
-  display: inline-block;
-  padding: 0.375rem 0.75rem;
-  background: #e8eaf6;
+.cantidad-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cantidad-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+  background: white;
   color: #667eea;
-  border-radius: 15px;
-  font-size: 0.875rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.cantidad-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+}
+
+.cantidad-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cantidad-display {
+  font-size: 1.2rem;
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+.btn-agregar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-agregar:hover:not(:disabled) {
+  background: #388E3C;
+  transform: translateY(-2px);
+}
+
+.btn-agregar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.producto-no-disponible {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.no-disponible-text {
+  color: #e74c3c;
   font-weight: 600;
 }
 
@@ -543,6 +797,257 @@ export default {
 
 .empty-productos p {
   color: #7f8c8d;
+}
+
+/* Carrito Lateral */
+.carrito-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 380px;
+  height: 100vh;
+  background: white;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.carrito-sidebar.carrito-abierto {
+  right: 0;
+}
+
+.carrito-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.carrito-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.btn-cerrar-carrito {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7f8c8d;
+  transition: color 0.2s;
+}
+
+.btn-cerrar-carrito:hover {
+  color: #e74c3c;
+}
+
+.carrito-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.carrito-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.carrito-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-nombre {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.item-precio {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 600;
+}
+
+.item-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cantidad-controls-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cantidad-btn-mini {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid #667eea;
+  background: white;
+  color: #667eea;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cantidad-btn-mini:hover {
+  background: #667eea;
+  color: white;
+}
+
+.cantidad-display-mini {
+  font-size: 0.9rem;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+}
+
+.btn-eliminar {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #e74c3c;
+  transition: transform 0.2s;
+}
+
+.btn-eliminar:hover {
+  transform: scale(1.2);
+}
+
+.carrito-vacio {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.carrito-vacio-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.carrito-vacio p {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.carrito-vacio-sub {
+  color: #7f8c8d !important;
+  font-size: 0.9rem;
+}
+
+.carrito-resumen {
+  padding: 1.5rem;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+}
+
+.resumen-linea {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.resumen-linea.total {
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-top: 1px solid #ddd;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.btn-pedir {
+  width: 100%;
+  padding: 1rem;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.3s;
+}
+
+.btn-pedir:hover {
+  background: #388E3C;
+}
+
+/* Overlay del carrito */
+.carrito-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Botón flotante del carrito */
+.btn-carrito-flotante {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #667eea;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  z-index: 998;
+  transition: all 0.3s;
+}
+
+.btn-carrito-flotante:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+
+.carrito-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 /* Responsive */
@@ -584,5 +1089,67 @@ export default {
   .tab-btn {
     white-space: nowrap;
   }
+
+  .carrito-sidebar {
+    width: 100%;
+    right: -100%;
+  }
+
+  .producto-controls {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .cantidad-controls {
+    justify-content: center;
+  }
+
+  .btn-carrito-flotante {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .btn-pedir.personalizado {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.btn-pedir.personalizado:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+.aviso-otros-restaurantes {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.aviso-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.aviso-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.aviso-text {
+  flex: 1;
+}
+
+.aviso-text strong {
+  color: #1976d2;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.aviso-text p {
+  margin: 0;
+  color: #546e7a;
+  font-size: 0.9rem;
+}
 }
 </style>

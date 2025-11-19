@@ -42,7 +42,7 @@
       </div>
       
       <!-- Stats -->
-      <div class="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg mb-4">
+      <!-- <div class="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg mb-4">
         <div class="text-center">
           <div class="text-lg font-bold text-blue-600">{{ restaurante.categorias?.length || 0 }}</div>
           <div class="text-xs text-gray-500">Categorías</div>
@@ -52,10 +52,11 @@
           <div class="text-lg font-bold text-blue-600">{{ restaurante.productos?.length || 0 }}</div>
           <div class="text-xs text-gray-500">Productos</div>
         </div>
-      </div>
+      </div> -->
       
       <!-- Botón (solo si abierto; sino, mensaje) -->
       <button 
+        @onclick.stop="$emit('ver-menu', restaurante.id)"
         v-if="restaurante.estado === 'Abierto'"
         class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all"
       >
@@ -80,4 +81,11 @@ const getImagenUrl = (imagen) => `http://localhost:8000/storage/${imagen}`;
 const handleImageError = (event) => {
   event.target.style.display = 'none';
 };
+
+function verMenu(restauranteId) {
+  this.$router.push({
+    name: 'RestauranteMenu',
+    params: { id: restauranteId }
+  });
+}
 </script>
