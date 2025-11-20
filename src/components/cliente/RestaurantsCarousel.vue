@@ -54,7 +54,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import RestaurantCard from '@/components/client/RestaurantCard.vue';
+import RestaurantCard from '@/components/cliente/RestaurantCard.vue';
 
 defineProps<{
   titulo: string;

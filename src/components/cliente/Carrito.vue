@@ -123,6 +123,7 @@
 
 <script>
 import { useCarritoStore } from '@/stores/carritoStore';
+import { crearOrden } from "@/services/orderService";
 
 export default {
   name: 'CarritoSidebar',
@@ -178,22 +179,46 @@ export default {
       this.carritoStore.eliminarProducto(item.producto.id);
     },
     
-    realizarPedido() {
-      // Emitir evento para que el componente padre maneje el pedido
-      this.$emit('realizar-pedido', {
-        items: this.carritoStore.items,
-        restaurantes: Object.values(this.carritoStore.itemsPorRestaurante).map(g => g.restaurante),
-        subtotal: this.carritoStore.subtotal,
-        envio: this.calcularEnvio(),
-        total: this.total
-      });
+    async realizarPedido() {
+      try {
+        if (!this.carritoStore.items.length) {
+          alert("Tu carrito está vacío");
+          return;
+        }
+
+        const orderPayload = {
+          restaurantId: this.carritoStore.items[0].restaurante.id,
+          items: this.carritoStore.items.map(i => ({
+            productId: i.producto.id,
+            quantity: i.cantidad,
+            price: Number(i.producto.precio)
+          })),
+        };
+
+        console.log("📦 Payload enviado al backend:", JSON.stringify(orderPayload, null, 2));
+
+        const order = await crearOrden(orderPayload);
+
+        // 🟢 VACÍA EL CARRITO AQUÍ
+        this.carritoStore.limpiarCarrito();
+
+        // Redirigir a pantalla de pago
+        this.$router.push({
+          name: "Payment",
+          query: { id: order.id }
+        });
+
+      } catch (error) {
+        console.error("Error al crear la orden:", error);
+        alert("No se pudo crear la orden.");
+      }
     },
     
     calcularEnvio() {
       if (this.carritoStore.subtotal === 0) return 0;
       
       const numRestaurantes = Object.keys(this.carritoStore.itemsPorRestaurante).length;
-      const envioBase = 15;
+      const envioBase = 5;
       const envioAdicional = 5;
       
       return numRestaurantes === 1 ? envioBase : envioBase + (envioAdicional * (numRestaurantes - 1));
