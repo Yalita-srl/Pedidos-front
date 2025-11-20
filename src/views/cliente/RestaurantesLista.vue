@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto px-4 pt-12">
 
     <!-- HEADER DE AUTENTICACIÓN -->
-    <header class="flex justify-between items-center mb-6">
+    <!-- <header class="flex justify-between items-center mb-6">
       <div v-if="authStore.isAuthenticated" class="text-sm text-gray-600">
         Bienvenido, <span class="font-semibold">{{ authStore.user?.email }}</span>
       </div>
@@ -23,7 +23,7 @@
           Iniciar Sesión
         </router-link>
       </div>
-    </header>
+    </header> -->
 
     <!-- TITULO MEJORADO (tu versión) -->
     <header class="text-center mb-10">
