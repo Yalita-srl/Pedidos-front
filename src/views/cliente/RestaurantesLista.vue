@@ -1,7 +1,31 @@
 <template>
   <div class="max-w-6xl mx-auto px-4 pt-12">
 
-    <!-- TITULO -->
+    <!-- HEADER DE AUTENTICACIÓN -->
+    <header class="flex justify-between items-center mb-6">
+      <div v-if="authStore.isAuthenticated" class="text-sm text-gray-600">
+        Bienvenido, <span class="font-semibold">{{ authStore.user?.email }}</span>
+      </div>
+      <div v-else></div>
+      <div>
+        <button
+          v-if="authStore.isAuthenticated"
+          @click="handleLogout"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+        >
+          Cerrar Sesión
+        </button>
+        <router-link
+          v-else
+          to="/login"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+        >
+          Iniciar Sesión
+        </router-link>
+      </div>
+    </header>
+
+    <!-- TITULO MEJORADO (tu versión) -->
     <header class="text-center mb-10">
       <h1 class="text-3xl font-bold text-gray-900">Restaurantes Disponibles</h1>
       <p class="text-gray-500 mt-1">
@@ -23,7 +47,7 @@
         </div>
       </div>
 
-      <!-- ONDA SUPERIOR -->
+      <!-- ONDA SUPERIOR (tu versión mejorada) -->
       <svg
         class="absolute top-0 left-0 w-full opacity-20 pointer-events-none"
         viewBox="0 0 500 150"
@@ -74,22 +98,19 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { getRestaurantes } from '@/services/catalogoService';
 
-import HeaderSection from '@/components/cliente/HederSection.vue';
 import SearchBar from '@/components/cliente/SearchBar.vue';
 import FiltersSection from '@/components/cliente/FiltersSection.vue';
-import LoadingSpinner from '@/components/cliente/LoadingSpinner.vue';
-import ErrorMessage from '@/components/cliente/ErrorMessage.vue';
 import RestaurantsCarousel from '@/components/cliente/RestaurantsCarousel.vue';
 import RestaurantCard from '@/components/cliente/RestaurantCard.vue';
-import EmptyState from '@/components/cliente/EmptyState.vue';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const restaurantes = ref([]);
 const loading = ref(true);
@@ -140,5 +161,9 @@ function verMenu(restauranteId) {
     name: 'RestauranteMenu',
     params: { id: restauranteId }
   });
+}
+
+function handleLogout() {
+  authStore.logout();
 }
 </script>
