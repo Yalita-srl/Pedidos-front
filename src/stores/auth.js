@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email, password) {
     try {
-      const response = await fetch('http://localhost/api/users/graphql', {
+      const response = await fetch('http://localhost:8001/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
