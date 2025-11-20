@@ -68,12 +68,10 @@
           >
             {{ cat.nombre }}
             <div class="acciones-categoria">
-              <button @click.stop="editarCategoria(cat)" class="btn-icon small">
-                <i class="fas fa-edit"></i>
+              <button @click.stop="editarCategoria(cat)" class="btn-icon small">Editar
+                <i class="fas fa-edit"></i> 
               </button>
-              <button @click.stop="eliminarCategoria(cat.id)" class="btn-icon small danger">
-                <i class="fas fa-trash"></i>
-              </button>
+              
             </div>
           </button>
         </div>
@@ -137,7 +135,7 @@
       :categorias="categorias"
       :restauranteId="restaurante?.id"
       @cerrar="modalProducto.abierto = false"
-      @guardar="guardarProducto"
+      @guardado="guardarProducto"
     />
 
     <CategoriaModal
@@ -670,5 +668,88 @@ onMounted(cargarDatos)
   .categorias-tabs { overflow-x: auto; padding-bottom: 0.5rem; }
   .tab-btn { white-space: nowrap; }
   .acciones { flex-direction: column; }
+}
+/* === CATEGORÍAS - BOTONES EDITAR MEJORADOS === */
+.categorias-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.tab-btn {
+  padding: 0.8rem 1.5rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 30px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  position: relative;
+  min-height: 48px;
+}
+
+.tab-btn:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.tab-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Contenedor de acciones (solo editar) */
+.acciones-categoria {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none; /* Evita que interfiera con el click del tab */
+}
+
+/* Mostrar al hacer hover o si está activa */
+.tab-btn:hover .acciones-categoria,
+.tab-btn.active .acciones-categoria {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Botón Editar - ÚNICO */
+.acciones-categoria .btn-editar-cat {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.acciones-categoria .btn-editar-cat:hover {
+  background: #0ea5e9;
+  color: white;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3);
+}
+
+/* Cuando la categoría está activa, el botón se ve más fuerte */
+.tab-btn.active .btn-editar-cat {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.tab-btn.active .btn-editar-cat:hover {
+  background: #667eea;
+  color: white;
 }
 </style>

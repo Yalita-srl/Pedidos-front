@@ -128,16 +128,9 @@
                 class="btn-icon btn-edit"
                 title="Editar"
               >
-                <i class="fas fa-edit"></i>
+                <i class="fas fa-edit"></i> Editar
               </button>
-              <button 
-                type="button" 
-                @click="eliminarCategoria(categoria.id)"
-                class="btn-icon btn-delete"
-                title="Eliminar"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
+              
             </div>
           </div>
         </div>
