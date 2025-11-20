@@ -1,6 +1,6 @@
 // router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import RestaurantesLista from '@/views/cliente/Restaurantes.vue'
+import RestaurantesLista from '@/views/cliente/RestaurantesLista.vue'
 // Importa otros componentes que necesites para las rutas
 
 const routes = [
