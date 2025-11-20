@@ -1,35 +1,33 @@
 <template>
-  <div v-if="categorias.length > 0" class="mb-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-3 text-center">Filtrar por tipo de comida</h3>
-    <div class="flex flex-wrap justify-center gap-3 overflow-x-auto pb-2">
-      <button
-        @click="updateCategoria(null)"
-        class="px-4 py-2 bg-white text-gray-600 border-2 border-gray-300 rounded-full text-sm font-medium hover:border-blue-500 hover:text-blue-500 transition-all whitespace-nowrap"
-        :class="{ 'bg-blue-500 text-white border-blue-500': filtroCategoria === null }"
-      >
-        Todos
-      </button>
-      <button
-        v-for="cat in categorias"
-        :key="cat"
-        @click="updateCategoria(cat)"
-        class="px-4 py-2 bg-white text-gray-600 border-2 border-gray-300 rounded-full text-sm font-medium hover:border-blue-500 hover:text-blue-500 transition-all whitespace-nowrap"
-        :class="{ 'bg-blue-500 text-white border-blue-500': filtroCategoria === cat }"
-      >
-        {{ cat }}
-      </button>
-    </div>
+  <div class="flex gap-3 overflow-x-auto py-4 no-scrollbar">
+
+    <button
+      class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-200 transition"
+      :class="{ 'bg-red-500 text-white border-red-500 shadow': filtroCategoria === null }"
+      @click="$emit('update:filtro-categoria', null)"
+    >
+      Todos
+    </button>
+
+    <button
+      v-for="cat in categorias"
+      :key="cat"
+      class="px-4 py-2 rounded-full bg-gray-100 text-gray-700 border border-gray-200 shadow-sm hover:bg-gray-200 transition"
+      :class="{ 'bg-red-500 text-white border-red-500 shadow': filtroCategoria === cat }"
+      @click="$emit('update:filtro-categoria', cat)"
+    >
+      {{ cat }}
+    </button>
+
   </div>
 </template>
 
-<script setup>
-defineProps({
-  categorias: Array,
-  filtroCategoria: [String, null]
-});
-defineEmits(['update:filtro-categoria']);
 
-function updateCategoria(cat) {
-  emit('update:filtro-categoria', cat);
-}
+<script setup lang="ts">
+defineProps<{
+  categorias: string[];
+  filtroCategoria: string | null;
+}>();
+
+defineEmits(["update:filtro-categoria"]);
 </script>

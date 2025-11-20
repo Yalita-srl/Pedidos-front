@@ -1,57 +1,85 @@
 <template>
-  <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-    <HeaderSection />
-    
-    <SearchBar v-model="searchQuery" />
-    
-    <FiltersSection 
-      :categorias="uniqueCategorias" 
-      :filtro-categoria="filtroCategoria"
-      @update:filtro-categoria="filtroCategoria = $event"
-    />
-    
-    <LoadingSpinner v-if="loading" />
-    
-    <ErrorMessage 
-      v-else-if="error" 
-      :message="error" 
-      @retry="fetchRestaurantes"
-    />
-    
-    <div v-else class="space-y-8">
-      <!-- Carrusel de Destacados -->
-      <RestaurantsCarousel 
-        v-if="restaurantesFiltrados.length > 0"
-        titulo="Restaurantes Destacados"
-        :restaurantes="restaurantesFiltrados.slice(0, 5)"
-        @ver-menu="verMenu"
+  <div class="max-w-5xl mx-auto px-4 pt-6">
+
+    <!-- TÍTULO -->
+    <h1 class="text-3xl font-bold text-center">Restaurantes Disponibles</h1>
+    <p class="text-center text-gray-500 mt-1">
+      Descubre nuestros restaurantes y sus deliciosos menús
+    </p>
+
+    <!-- BANNER YALA -->
+    <div class="relative overflow-hidden rounded-2xl px-8 pt-8 pb-16 text-white shadow-md
+            bg-linear-to-r from-red-500 to-red-400 mb-12">
+      <!-- LOGO -->
+      <div class="flex items-center gap-3 mb-3 relative z-10">
+        <img src="/img/logo-yala.png" class="w-12 h-12 rounded-xl shadow-lg" />
+        <div>
+          <h3 class="text-2xl font-extrabold tracking-tight">YALA Delivery</h3>
+          <p class="text-sm opacity-90">Tu comida favorita al instante</p>
+        </div>
+      </div>
+
+      <!-- ONDA SUPERIOR -->
+      <svg class="absolute top-0 left-0 w-full opacity-20" viewBox="0 0 500 150" preserveAspectRatio="none">
+        <path d="M0.00,49.98 C150.00,150.00 349.56,-49.98 500.00,49.98 L500.00,00.00 L0.00,0.00 Z" 
+              style="stroke: none; fill: #ffffff;"></path>
+      </svg>
+
+    </div>
+
+    <div class="h-6"></div>
+
+    <!-- BUSCADOR -->
+    <div class="mt-10">
+      <SearchBar v-model="searchQuery" />
+    </div>
+
+    <!-- FILTROS -->
+    <div class="mt-6">
+      <FiltersSection
+        :categorias="uniqueCategorias"
+        :filtro-categoria="filtroCategoria"
+        @update:filtro-categoria="filtroCategoria = $event"
       />
-      
-      <!-- Carrusel de Todos -->
-      <RestaurantsCarousel 
-        titulo="Todos los Restaurantes"
-        :restaurantes="restaurantesFiltrados"
+    </div>
+
+    <!-- DESTACADOS -->
+    <div class="mt-10">
+      <RestaurantsCarousel
+        titulo="Destacados para ti"
+        :restaurantes="restaurantesFiltrados.slice(0, 10)"
         @ver-menu="verMenu"
       />
     </div>
-    
-    <EmptyState 
-      v-if="!loading && restaurantesFiltrados.length === 0" 
-      :mensaje="searchQuery ? 'No hay restaurantes que coincidan con tu búsqueda' : 'No hay restaurantes disponibles'"
-    />
+
+    <!-- TODOS -->
+    <h2 class="text-xl font-bold mt-10 mb-4">Todos los Restaurantes</h2>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+      <RestaurantCard
+        v-for="r in restaurantesFiltrados"
+        :key="r.id"
+        :restaurante="r"
+        @click="verMenu(r.id)"
+      />
+    </div>
+
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getRestaurantes } from '@/services/catalogoService';
+
 import HeaderSection from '@/components/client/HederSection.vue';
 import SearchBar from '@/components/client/SearchBar.vue';
 import FiltersSection from '@/components/client/FiltersSection.vue';
 import LoadingSpinner from '@/components/client/LoadingSpinner.vue';
 import ErrorMessage from '@/components/client/ErrorMessage.vue';
 import RestaurantsCarousel from '@/components/client/RestaurantsCarousel.vue';
+import RestaurantCard from '@/components/client/RestaurantCard.vue';
 import EmptyState from '@/components/client/EmptyState.vue';
 
 const router = useRouter();
@@ -72,10 +100,14 @@ const uniqueCategorias = computed(() => {
 
 const restaurantesFiltrados = computed(() => {
   let filtered = restaurantes.value.filter(r => {
-    const matchesSearch = r.nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                          r.direccion.toLowerCase().includes(searchQuery.value.toLowerCase());
-    const matchesCategoria = filtroCategoria.value === null || 
-                             r.categorias?.some(c => c.nombre === filtroCategoria.value);
+    const matchesSearch =
+      r.nombre.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      r.direccion.toLowerCase().includes(searchQuery.value.toLowerCase());
+
+    const matchesCategoria =
+      filtroCategoria.value === null ||
+      r.categorias?.some(c => c.nombre === filtroCategoria.value);
+
     return matchesSearch && matchesCategoria && r.estado === 'Abierto';
   });
   return filtered;
@@ -98,6 +130,9 @@ async function fetchRestaurantes() {
 }
 
 function verMenu(restauranteId) {
-  router.push({ name: 'RestauranteMenu', params: { id: restauranteId } });
+  router.push({
+    name: 'RestauranteMenu',
+    params: { id: restauranteId }
+  });
 }
 </script>
