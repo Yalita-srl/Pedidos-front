@@ -1,28 +1,33 @@
 import axios from "axios";
+import { useAuthStore } from "@/stores/auth";
 
-const API_BASE = import.meta.env.VITE_ORDERS_API || "http://localhost:3000/api/v1/orders";
+// Base URL del microservicio de órdenes
+const API_BASE =
+  import.meta.env.VITE_ORDERS_API || "http://localhost:3000/api/v1/orders";
 
 const api = axios.create({
   baseURL: API_BASE,
   withCredentials: true,
 });
 
-// api.interceptors.request.use(config => {
-//   const token = localStorage.getItem('token');
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
+/* ----------------------------------------------------------
+   INYECTAR TOKEN DE PINIA AUTOMÁTICAMENTE
+---------------------------------------------------------- */
+api.interceptors.request.use((config) => {
+  const auth = useAuthStore();
+
+  if (auth.token) {
+    config.headers.Authorization = `Bearer ${auth.token}`;
+  }
+
+  return config;
+});
 
 /* ----------------------------------------------------------
    CREATE ORDER
 ---------------------------------------------------------- */
 export async function crearOrden(payload) {
-  const { data } = await api.post("/", payload,
-    {
-      headers: {
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMyIsImVtYWlsIjoiYXJtYW5kb251bmV6NDA0QGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiZXhwIjoxNzYzNjU1NjczLCJvcmlnX2lhdCI6MTc2MzY1MjA3M30.yXFyXYuMhhavckSgiqMF-dEWEYi6dJjwgNryxMG73rI`
-      }
-    });
+  const { data } = await api.post("/", payload);
   return data;
 }
 
@@ -30,15 +35,7 @@ export async function crearOrden(payload) {
    GET ORDER BY ID
 ---------------------------------------------------------- */
 export async function obtenerOrdenPorId(id) {
-  const token = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMyIsImVtYWlsIjoiYXJtYW5kb251bmV6NDA0QGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiZXhwIjoxNzYzNjU1NjczLCJvcmlnX2lhdCI6MTc2MzY1MjA3M30.yXFyXYuMhhavckSgiqMF-dEWEYi6dJjwgNryxMG73rI`;
-
-  const { data } = await api.get(`/${id}`,
-    {
-      headers: {
-        Authorization: token
-      }
-    }
-  );
+  const { data } = await api.get(`/${id}`);
   return data;
 }
 
@@ -59,26 +56,12 @@ export async function obtenerOrdenesDeRestaurante(restId) {
 }
 
 /* ----------------------------------------------------------
-   UPDATE STATE OF ORDER
-   (Ej: PAYED, CANCELLED, DELIVERED)
+   UPDATE STATE OF ORDER (paid, cancelled, delivered)
 ---------------------------------------------------------- */
-export async function actualizarEstadoOrden(id) {
-  const estado = "paid";
-  const token = `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMyIsImVtYWlsIjoiYXJtYW5kb251bmV6NDA0QGdtYWlsLmNvbSIsInJvbGUiOiJ1c2VyIiwiZXhwIjoxNzYzNjU1NjczLCJvcmlnX2lhdCI6MTc2MzY1MjA3M30.yXFyXYuMhhavckSgiqMF-dEWEYi6dJjwgNryxMG73rI`;
-
-  const { data } = await api.put(
-    `/${id}/state/${estado}`,
-    {}, // cuerpo vacío
-    {
-      headers: {
-        Authorization: token
-      }
-    }
-  );
-
+export async function actualizarEstadoOrden(id, estado = "paid") {
+  const { data } = await api.put(`/${id}/state/${estado}`);
   return data;
 }
-
 
 /* ----------------------------------------------------------
    DELETE ORDER

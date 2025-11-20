@@ -84,7 +84,7 @@ async function procesarPago() {
 
   try {
     // 1. Cambiar el estado de la orden a pagado
-    await actualizarEstadoOrden(id, "payed");
+    await actualizarEstadoOrden(id, "paid");
 
     // 2. Vaciar carrito
     carritoStore.limpiarCarrito();
