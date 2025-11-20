@@ -1,6 +1,30 @@
 <template>
   <div class="max-w-5xl mx-auto px-4 pt-6">
 
+    <!-- HEADER DE AUTENTICACIÓN -->
+    <header class="flex justify-between items-center mb-6">
+      <div v-if="authStore.isAuthenticated" class="text-sm text-gray-600">
+        Bienvenido, <span class="font-semibold">{{ authStore.user?.email }}</span>
+      </div>
+      <div v-else></div>
+      <div>
+        <button
+          v-if="authStore.isAuthenticated"
+          @click="handleLogout"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+        >
+          Cerrar Sesión
+        </button>
+        <router-link
+          v-else
+          to="/login"
+          class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600"
+        >
+          Iniciar Sesión
+        </router-link>
+      </div>
+    </header>
+
     <!-- TÍTULO -->
     <h1 class="text-3xl font-bold text-center">Restaurantes Disponibles</h1>
     <p class="text-center text-gray-500 mt-1">
@@ -21,7 +45,7 @@
 
       <!-- ONDA SUPERIOR -->
       <svg class="absolute top-0 left-0 w-full opacity-20" viewBox="0 0 500 150" preserveAspectRatio="none">
-        <path d="M0.00,49.98 C150.00,150.00 349.56,-49.98 500.00,49.98 L500.00,00.00 L0.00,0.00 Z" 
+        <path d="M0.00,49.98 C150.00,150.00 349.56,-49.98 500.00,49.98 L500.00,00.00 L0.00,00.00 Z" 
               style="stroke: none; fill: #ffffff;"></path>
       </svg>
 
@@ -71,6 +95,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { getRestaurantes } from '@/services/catalogoService';
 
 import HeaderSection from '@/components/client/HederSection.vue';
@@ -83,6 +108,7 @@ import RestaurantCard from '@/components/client/RestaurantCard.vue';
 import EmptyState from '@/components/client/EmptyState.vue';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const restaurantes = ref([]);
 const loading = ref(true);
@@ -134,5 +160,9 @@ function verMenu(restauranteId) {
     name: 'RestauranteMenu',
     params: { id: restauranteId }
   });
+}
+
+function handleLogout() {
+  authStore.logout();
 }
 </script>
