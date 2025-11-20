@@ -1,561 +1,215 @@
 <template>
-  <div class="menu-management">
-    <RestaurantHeader />
-    
-    <div class="container">
-      <div class="management-header">
-        <h1>Gestión de Menú</h1>
-        <button @click="showAddProductModal = true" class="btn-primary">
-          + Agregar Producto
-        </button>
-      </div>
-
-      <!-- Estadísticas -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Total Productos</h3>
-          <p class="stat-number">{{ totalProducts }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Productos Disponibles</h3>
-          <p class="stat-number available">{{ availableProducts }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Productos No Disponibles</h3>
-          <p class="stat-number unavailable">{{ unavailableProducts }}</p>
-        </div>
-        <div class="stat-card">
-          <h3>Categorías</h3>
-          <p class="stat-number">{{ restaurant.categorias.length }}</p>
-        </div>
-      </div>
-
-      <!-- Gestión de Categorías -->
-      <div class="categories-section">
-        <div class="section-header">
-          <h2>Categorías</h2>
-          <button @click="showAddCategoryModal = true" class="btn-secondary">
-            + Nueva Categoría
-          </button>
-        </div>
-        
-        <div class="categories-list">
-          <div 
-            v-for="categoria in restaurant.categorias" 
-            :key="categoria.id"
-            class="category-item"
-          >
-            <span>{{ categoria.nombre }}</span>
-            <div class="category-actions">
-              <button @click="editCategory(categoria)" class="btn-edit">✏️</button>
-              <button @click="deleteCategory(categoria.id)" class="btn-delete">🗑️</button>
-            </div>
-          </div>
-          
-          <div v-if="restaurant.categorias.length === 0" class="empty-categories">
-            <p>No hay categorías creadas</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Lista de Productos -->
-      <div class="products-section">
-        <div class="section-header">
-          <h2>Productos</h2>
-          <div class="product-filters">
-            <select v-model="productFilter" @change="filterProducts">
-              <option value="all">Todos los productos</option>
-              <option value="available">Solo disponibles</option>
-              <option value="unavailable">Solo no disponibles</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="products-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Imagen</th>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Disponible</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr 
-                v-for="producto in filteredProducts" 
-                :key="producto.id"
-                :class="{ 'unavailable-row': !producto.disponible }"
-              >
-                <td>
-                  <div class="product-image-small">
-                    <img 
-                      v-if="producto.imagen" 
-                      :src="getImageUrl(producto.imagen)" 
-                      :alt="producto.nombre"
-                    />
-                    <div v-else class="no-image-small">📷</div>
-                  </div>
-                </td>
-                <td>{{ producto.nombre }}</td>
-                <td>
-                  {{ getCategoryName(producto.categoria_id) }}
-                </td>
-                <td class="description-cell">
-                  {{ producto.descripcion }}
-                </td>
-                <td>${{ producto.precio }}</td>
-                <td>
-                  <label class="switch">
-                    <input 
-                      type="checkbox" 
-                      :checked="producto.disponible"
-                      @change="toggleAvailability(producto)"
-                    >
-                    <span class="slider"></span>
-                  </label>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button 
-                      @click="editProduct(producto)" 
-                      class="btn-edit"
-                      title="Editar producto"
-                    >
-                      ✏️
-                    </button>
-                    <button 
-                      @click="deleteProduct(producto.id)" 
-                      class="btn-delete"
-                      title="Eliminar producto"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          
-          <div v-if="filteredProducts.length === 0" class="empty-products">
-            <p>No hay productos que coincidan con el filtro</p>
-          </div>
-        </div>
-      </div>
+  <div class="restaurantes-admin">
+    <div class="header">
+      <h1>Mis Restaurantes</h1>
+      <button @click="nuevoRestaurante" class="btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Restaurante
+      </button>
     </div>
 
-    <!-- Modal Agregar/Editar Producto -->
-    <div v-if="showAddProductModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>{{ editingProduct ? 'Editar Producto' : 'Agregar Nuevo Producto' }}</h3>
-          <button @click="closeModal" class="close-btn">×</button>
-        </div>
-        
-        <div class="modal-body">
-          <form @submit.prevent="saveProduct">
-            <div class="form-group">
-              <label>Nombre del Producto *</label>
-              <input 
-                type="text" 
-                v-model="productForm.nombre" 
-                required 
-                placeholder="Ej: Hamburguesa Especial"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label>Categoría *</label>
-              <select v-model="productForm.categoria_id" required>
-                <option value="">Seleccionar categoría</option>
-                <option 
-                  v-for="categoria in restaurant.categorias" 
-                  :key="categoria.id" 
-                  :value="categoria.id"
-                >
-                  {{ categoria.nombre }}
-                </option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Descripción</label>
-              <textarea 
-                v-model="productForm.descripcion" 
-                placeholder="Descripción del producto..."
-                rows="3"
-              ></textarea>
-            </div>
-            
-            <div class="form-group">
-              <label>Precio *</label>
-              <input 
-                type="number" 
-                v-model="productForm.precio" 
-                step="0.01" 
-                min="0" 
-                required 
-                placeholder="0.00"
-              />
-            </div>
-            
-            <div class="form-group">
-              <label>Imagen</label>
-              <input 
-                type="file" 
-                @change="handleImageUpload" 
-                accept="image/*"
-              />
-              <div v-if="productForm.imagen_preview" class="image-preview">
-                <img :src="productForm.imagen_preview" alt="Preview" />
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="productForm.disponible" />
-                Producto disponible
-              </label>
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" @click="closeModal" class="btn-cancel">
-                Cancelar
-              </button>
-              <button type="submit" class="btn-primary">
-                {{ editingProduct ? 'Actualizar' : 'Crear' }} Producto
-              </button>
-            </div>
-          </form>
-        </div>
+    <!-- Mensaje de éxito (fijo arriba) -->
+    <transition name="fade">
+      <div v-if="successMessage" class="success-message">
+        <i class="fas fa-check-circle"></i> {{ successMessage }}
       </div>
+    </transition>
+
+    <!-- Loading -->
+    <div v-if="loading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Cargando restaurantes...
     </div>
 
-    <!-- Modal Agregar/Editar Categoría -->
-    <div v-if="showAddCategoryModal" class="modal-overlay">
-      <div class="modal">
-        <div class="modal-header">
-          <h3>{{ editingCategory ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
-          <button @click="closeCategoryModal" class="close-btn">×</button>
+    <!-- Error -->
+    <div v-else-if="error" class="error">
+      <i class="fas fa-exclamation-triangle"></i> {{ error }}
+      <button @click="cargarRestaurantes" class="btn-retry">Reintentar</button>
+    </div>
+
+    <!-- Empty -->
+    <div v-else-if="restaurantes.length === 0" class="empty-state">
+      <i class="fas fa-store-slash"></i>
+      <h3>No tienes restaurantes registrados</h3>
+      <p>Comienza creando tu primer restaurante</p>
+      <button @click="nuevoRestaurante" class="btn-primary">
+        Crear Primer Restaurante
+      </button>
+    </div>
+
+    <!-- Lista de restaurantes (cards apiladas) -->
+    <div v-else class="restaurantes-list">
+      <div
+        v-for="restaurante in restaurantes"
+        :key="restaurante.id"
+        class="restaurante-card"
+        @click="verDetalles(restaurante.id)"
+      >
+        <div class="card-content">
+          <!-- Header con nombre y estado -->
+          <div class="card-header">
+            <h3 class="nombre">{{ restaurante.nombre }}</h3>
+
+            <button
+              @click.stop="cambiarEstado(restaurante)"
+              class="estado-btn"
+              :class="restaurante.estado === 'Abierto' ? 'abierto' : 'cerrado'"
+            >
+              {{ restaurante.estado }}
+              <span class="status-dot"></span>
+            </button>
+          </div>
+
+          <!-- Información básica -->
+          <div class="card-info">
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ restaurante.direccion }}</span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-phone"></i>
+              <span>{{ restaurante.telefono }}</span>
+            </div>
+          </div>
+
+          <!-- Estadísticas -->
+          <div class="card-stats">
+            <div class="stat">
+              <span class="number">{{ restaurante.categorias.length }}</span>
+              <span class="label">Categorías</span>
+            </div>
+            <div class="stat">
+              <span class="number">{{ restaurante.productos.length }}</span>
+              <span class="label">Productos</span>
+            </div>
+          </div>
+
+          <!-- Acciones (sin el botón "Ver") -->
+          <div class="card-actions">
+            <button @click.stop="editarRestaurante(restaurante.id)" class="btn-outline">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+            <button @click.stop="eliminarRestaurante(restaurante.id)" class="btn-danger">
+              <i class="fas fa-trash"></i> Eliminar
+            </button>
+          </div>
         </div>
-        
-        <div class="modal-body">
-          <form @submit.prevent="saveCategory">
-            <div class="form-group">
-              <label>Nombre de la Categoría *</label>
-              <input 
-                type="text" 
-                v-model="categoryForm.nombre" 
-                required 
-                placeholder="Ej: Entradas, Bebidas, Postres..."
-              />
-            </div>
-            
-            <div class="form-actions">
-              <button type="button" @click="closeCategoryModal" class="btn-cancel">
-                Cancelar
-              </button>
-              <button type="submit" class="btn-primary">
-                {{ editingCategory ? 'Actualizar' : 'Crear' }} Categoría
-              </button>
-            </div>
-          </form>
+
+        <!-- Flecha sutil para indicar que es clickable -->
+        <div class="card-arrow">
+          <i class="fas fa-chevron-right"></i>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import { ref, computed, onMounted } from 'vue'
-import { useRestaurantStore } from '@/store/restaurant'
-import RestaurantHeader from '@/components/restaurant/RestaurantHeader.vue'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getRestaurantesPorUsuarioAdmin, deleteRestaurante,updateRestaurante } from '@/services/catalogoService'
 
-export default {
-  name: 'MenuManagement',
-  components: {
-    RestaurantHeader
-  },
-  setup() {
-    const restaurantStore = useRestaurantStore()
-    
-    const restaurant = ref({
-      categorias: [],
-      productos: []
-    })
-    const showAddProductModal = ref(false)
-    const showAddCategoryModal = ref(false)
-    const editingProduct = ref(null)
-    const editingCategory = ref(null)
-    const productFilter = ref('all')
+const router = useRouter()
+const restaurantes = ref([])
+const loading = ref(false)
+const error = ref('')
+const successMessage = ref('')
 
-    // Formularios
-    const productForm = ref({
-      nombre: '',
-      categoria_id: '',
-      descripcion: '',
-      precio: '',
-      disponible: true,
-      imagen: null,
-      imagen_preview: null
-    })
+// TODO: Cambiar por el ID del usuario autenticado
+const usuarioAdminId = ref(1)
 
-    const categoryForm = ref({
-      nombre: ''
-    })
+const cargarRestaurantes = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId.value)
+    restaurantes.value = response.data
 
-    // Cargar datos del restaurante
-    const loadRestaurantData = async () => {
-      try {
-        // En una app real, esto vendría de tu API
-        const response = await restaurantStore.getCurrentRestaurant()
-        restaurant.value = response.data
-      } catch (error) {
-        console.error('Error loading restaurant data:', error)
-      }
-    }
-
-    // Computed properties para estadísticas
-    const totalProducts = computed(() => restaurant.value.productos.length)
-    const availableProducts = computed(() => 
-      restaurant.value.productos.filter(p => p.disponible).length
-    )
-    const unavailableProducts = computed(() => 
-      restaurant.value.productos.filter(p => !p.disponible).length
-    )
-
-    // Filtrar productos
-    const filteredProducts = computed(() => {
-      switch (productFilter.value) {
-        case 'available':
-          return restaurant.value.productos.filter(p => p.disponible)
-        case 'unavailable':
-          return restaurant.value.productos.filter(p => !p.disponible)
-        default:
-          return restaurant.value.productos
-      }
-    })
-
-    // Obtener nombre de categoría
-    const getCategoryName = (categoryId) => {
-      const category = restaurant.value.categorias.find(c => c.id === categoryId)
-      return category ? category.nombre : 'Sin categoría'
-    }
-
-    // URL de imagen
-    const getImageUrl = (imagePath) => {
-      return `http://localhost:8000/storage/${imagePath}`
-    }
-
-    // Métodos para productos
-    const addProduct = () => {
-      editingProduct.value = null
-      resetProductForm()
-      showAddProductModal.value = true
-    }
-
-    const editProduct = (producto) => {
-      editingProduct.value = producto
-      productForm.value = {
-        nombre: producto.nombre,
-        categoria_id: producto.categoria_id,
-        descripcion: producto.descripcion,
-        precio: producto.precio,
-        disponible: producto.disponible,
-        imagen: null,
-        imagen_preview: producto.imagen ? getImageUrl(producto.imagen) : null
-      }
-      showAddProductModal.value = true
-    }
-
-    const saveProduct = async () => {
-      try {
-        const formData = new FormData()
-        Object.keys(productForm.value).forEach(key => {
-          if (key !== 'imagen_preview') {
-            formData.append(key, productForm.value[key])
-          }
-        })
-
-        if (editingProduct.value) {
-          // Actualizar producto existente
-          await restaurantStore.updateProduct(editingProduct.value.id, formData)
-        } else {
-          // Crear nuevo producto
-          await restaurantStore.createProduct(formData)
-        }
-
-        closeModal()
-        await loadRestaurantData()
-      } catch (error) {
-        console.error('Error saving product:', error)
-      }
-    }
-
-    const deleteProduct = async (productId) => {
-      if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-        try {
-          await restaurantStore.deleteProduct(productId)
-          await loadRestaurantData()
-        } catch (error) {
-          console.error('Error deleting product:', error)
-        }
-      }
-    }
-
-    const toggleAvailability = async (producto) => {
-      try {
-        await restaurantStore.updateProduct(producto.id, {
-          disponible: !producto.disponible
-        })
-        await loadRestaurantData()
-      } catch (error) {
-        console.error('Error toggling availability:', error)
-      }
-    }
-
-    // Métodos para categorías
-    const addCategory = () => {
-      editingCategory.value = null
-      resetCategoryForm()
-      showAddCategoryModal.value = true
-    }
-
-    const editCategory = (categoria) => {
-      editingCategory.value = categoria
-      categoryForm.value.nombre = categoria.nombre
-      showAddCategoryModal.value = true
-    }
-
-    const saveCategory = async () => {
-      try {
-        if (editingCategory.value) {
-          await restaurantStore.updateCategory(editingCategory.value.id, categoryForm.value)
-        } else {
-          await restaurantStore.createCategory(categoryForm.value)
-        }
-
-        closeCategoryModal()
-        await loadRestaurantData()
-      } catch (error) {
-        console.error('Error saving category:', error)
-      }
-    }
-
-    const deleteCategory = async (categoryId) => {
-      if (confirm('¿Estás seguro de que quieres eliminar esta categoría? Los productos en esta categoría quedarán sin categoría.')) {
-        try {
-          await restaurantStore.deleteCategory(categoryId)
-          await loadRestaurantData()
-        } catch (error) {
-          console.error('Error deleting category:', error)
-        }
-      }
-    }
-
-    // Utilidades
-    const handleImageUpload = (event) => {
-      const file = event.target.files[0]
-      if (file) {
-        productForm.value.imagen = file
-        productForm.value.imagen_preview = URL.createObjectURL(file)
-      }
-    }
-
-    const resetProductForm = () => {
-      productForm.value = {
-        nombre: '',
-        categoria_id: '',
-        descripcion: '',
-        precio: '',
-        disponible: true,
-        imagen: null,
-        imagen_preview: null
-      }
-    }
-
-    const resetCategoryForm = () => {
-      categoryForm.value = { nombre: '' }
-    }
-
-    const closeModal = () => {
-      showAddProductModal.value = false
-      editingProduct.value = null
-      resetProductForm()
-    }
-
-    const closeCategoryModal = () => {
-      showAddCategoryModal.value = false
-      editingCategory.value = null
-      resetCategoryForm()
-    }
-
-    const filterProducts = () => {
-      // El filtro se aplica automáticamente mediante computed property
-    }
-
-    onMounted(() => {
-      loadRestaurantData()
-    })
-
-    return {
-      restaurant,
-      showAddProductModal,
-      showAddCategoryModal,
-      editingProduct,
-      editingCategory,
-      productFilter,
-      productForm,
-      categoryForm,
-      totalProducts,
-      availableProducts,
-      unavailableProducts,
-      filteredProducts,
-      addProduct,
-      editProduct,
-      saveProduct,
-      deleteProduct,
-      toggleAvailability,
-      addCategory,
-      editCategory,
-      saveCategory,
-      deleteCategory,
-      getCategoryName,
-      getImageUrl,
-      handleImageUpload,
-      closeModal,
-      closeCategoryModal,
-      filterProducts
-    }
+    successMessage.value = `${restaurantes.value.length} restaurante(s) cargado(s)`
+    setTimeout(() => (successMessage.value = ''), 3000)
+  } catch (err) {
+    console.error(err)
+    error.value = 'Error al cargar los restaurantes. Intenta nuevamente.'
+  } finally {
+    loading.value = false
   }
 }
+
+const verDetalles = (id) => {
+  router.push({ name: 'RestauranteProductos', params: { id } })
+}
+
+const editarRestaurante = (id) => {
+  router.push(`/restaurantes/${id}/editar`)
+}
+
+const nuevoRestaurante = () => {
+  router.push('/restaurantes/nuevo')
+}
+
+const eliminarRestaurante = async (id) => {
+  if (!confirm('¿Seguro que quieres eliminar este restaurante? Esta acción no se puede deshacer.')) return
+
+  try {
+    await deleteRestaurante(id)
+    successMessage.value = 'Restaurante eliminado correctamente'
+    await cargarRestaurantes()
+    setTimeout(() => (successMessage.value = ''), 3000)
+  } catch (err) {
+    error.value = 'Error al eliminar el restaurante.'
+  }
+}
+
+const cambiarEstado = async (restaurante) => {
+  const nuevoEstado = restaurante.estado === 'Abierto' ? 'Cerrado' : 'Abierto';
+  const confirmacion = confirm(`¿Estás seguro de cambiar el estado a ${nuevoEstado}?`);
+  
+  if (confirmacion) {
+    try {
+      // Assuming you have an updateRestaurante service method
+      await updateRestaurante(restaurante.id, { 
+        ...restaurante,
+        estado: nuevoEstado 
+      });
+      
+      // Update the local state
+      const index = restaurantes.value.findIndex(r => r.id === restaurante.id);
+      if (index !== -1) {
+        restaurantes.value[index].estado = nuevoEstado;
+      }
+      
+      // Show success message
+      successMessage.value = `Estado actualizado a ${nuevoEstado} correctamente`;
+      setTimeout(() => { successMessage.value = ''; }, 3000);
+      
+    } catch (error) {
+      console.error('Error al actualizar el estado:', error);
+      error.value = 'Error al actualizar el estado del restaurante';
+    }
+  }
+};
+
+onMounted(cargarRestaurantes)
 </script>
 
 <style scoped>
-.menu-management {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-}
-
-.container {
+.restaurantes-admin {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.management-header {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.management-header h1 {
-  color: #333;
+.header h1 {
   margin: 0;
+  font-size: 2rem;
+  color: #222;
 }
 
 .btn-primary {
@@ -563,366 +217,243 @@ export default {
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
 }
 
 .btn-primary:hover {
   background: #0056b3;
 }
 
-/* Estadísticas */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
+/* Mensajes */
+.success-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #d4edda;
+  color: #155724;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 1px solid #c3e6cb;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  animation: slideIn 0.4s ease;
 }
 
-.stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.loading, .error, .empty-state {
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 60px 20px;
+  color: #666;
+  font-size: 1.1rem;
 }
 
-.stat-number {
-  font-size: 32px;
-  font-weight: bold;
-  margin: 10px 0 0 0;
+.error { color: #dc3545; }
+.empty-state i { font-size: 64px; color: #bbb; margin-bottom: 20px; }
+
+/* Lista de cards apiladas */
+.restaurantes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.stat-number.available {
-  color: #28a745;
-}
-
-.stat-number.unavailable {
-  color: #dc3545;
-}
-
-/* Secciones */
-.categories-section, .products-section {
+.restaurante-card {
   background: white;
-  padding: 25px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
-.section-header {
+.restaurante-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+  border-color: #007bff33;
+}
+
+.card-content {
+  flex: 1;
+  padding: 24px;
+}
+
+.card-header {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.nombre {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.estado-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
   align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.estado-btn.abierto {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-btn.cerrado {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.card-info {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #555;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.info-item i {
+  color: #007bff;
+  width: 18px;
+}
+
+.card-stats {
+  display: flex;
+  gap: 30px;
+  padding: 16px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
   margin-bottom: 20px;
 }
 
-.section-header h2 {
-  margin: 0;
-  color: #333;
+.stat {
+  text-align: center;
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Lista de categorías */
-.categories-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.category-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 5px;
-  border-left: 4px solid #007bff;
-}
-
-.category-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-edit, .btn-delete {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 5px;
-}
-
-.btn-edit:hover {
+.number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
   color: #007bff;
 }
 
-.btn-delete:hover {
-  color: #dc3545;
+.label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #777;
+  letter-spacing: 0.5px;
 }
 
-/* Tabla de productos */
-.products-table {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-}
-
-th, td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
-}
-
-th {
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #495057;
-}
-
-.unavailable-row {
-  background: #f8f9fa;
-  opacity: 0.6;
-}
-
-.product-image-small {
-  width: 50px;
-  height: 50px;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.product-image-small img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.no-image-small {
-  width: 100%;
-  height: 100%;
-  background: #e9ecef;
+.card-actions {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
+  gap: 12px;
 }
 
-.description-cell {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Switch para disponibilidad */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #28a745;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-}
-
-/* Modales */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: white;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.modal-header h3 {
-  margin: 0;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6c757d;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #495057;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
+.btn-outline, .btn-danger {
+  flex: 1;
   padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.form-group textarea {
-  resize: vertical;
-}
-
-.checkbox-label {
+  border-radius: 8px;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: normal;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
 }
 
-.checkbox-label input {
-  width: auto;
+.btn-outline {
+  background: transparent;
+  color: #007bff;
+  border: 1.5px solid #007bff;
 }
 
-.image-preview {
-  margin-top: 10px;
+.btn-outline:hover {
+  background: #007bff;
+  color: white;
 }
 
-.image-preview img {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 5px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 30px;
-}
-
-.btn-cancel {
-  background: #6c757d;
+.btn-danger {
+  background: #dc3545;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
 }
 
-.btn-cancel:hover {
-  background: #545b62;
+.btn-danger:hover {
+  background: #c82333;
 }
 
-.empty-categories, .empty-products {
-  text-align: center;
-  padding: 40px;
-  color: #6c757d;
-  grid-column: 1 / -1;
+.card-arrow {
+  padding: 0 24px;
+  color: #007bff88;
+  font-size: 1.5rem;
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-  .management-header {
+  .header {
     flex-direction: column;
-    gap: 15px;
+    text-align: center;
+  }
+
+  .card-header {
+    flex-direction: column;
     align-items: flex-start;
   }
-  
-  .section-header {
+
+  .card-stats {
+    gap: 20px;
+  }
+
+  .card-actions {
     flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .categories-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .modal {
-    width: 95%;
-    margin: 20px;
   }
 }
 </style>

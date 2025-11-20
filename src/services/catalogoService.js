@@ -129,9 +129,9 @@ export const getRestaurantesPorUsuarioAdmin = (usuarioAdminId) => {
  */
 export const getRestaurante = async (restauranteId) => {
   try {
-    console.log(`Fetching restaurant with ID: ${restauranteId}`);
+   
     const response = await api.get(`/restaurantes/${restauranteId}`);
-    console.log('API Response for restaurant:', response);
+    
     return response;
   } catch (error) {
     console.error('Error in getRestaurante:', error);
