@@ -1,28 +1,60 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RestaurantesLista from '@/views/cliente/RestaurantesLista.vue'
+import RestauranteForm from '@/components/restaurante/RestauranteForm.vue'
 import PaymentView from '@/views/cliente/PaymentView.vue'
-import Login from '@/views/Login.vue' // Importar el componente Login
+import Login from '@/views/Login.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const routes = [
+  // Rutas para clientes
   {
     path: '/',
     name: 'Restaurantes',
     component: RestaurantesLista,
-    meta: { requiresAuth: true } // Marcar como ruta protegida
+    meta: { requiresAuth: true }
   },
   {
     path: '/restaurantes/:id/menu',
     name: 'RestauranteMenu',
     component: () => import('@/views/cliente/RestauranteMenu.vue'),
-    meta: { requiresAuth: true } // Marcar como ruta protegida
+    meta: { requiresAuth: true }
   },
   {
     path: '/payment',
     name: 'Payment',
     component: PaymentView,
-    meta: { requiresAuth: true } // Agregar protección a la ruta de pago
+    meta: { requiresAuth: true }
   },
+  
+  // Rutas para administración de restaurantes
+  {
+    path: '/mis-restaurantes',
+    name: 'RestaurantesAdmin',
+    component: () => import('@/views/restaurante/Menu.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/restaurantes/nuevo',
+    name: 'NuevoRestaurante',
+    component: RestauranteForm,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/restaurantes/:id/editar',
+    name: 'EditarRestaurante',
+    component: RestauranteForm,
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/restaurantes/:id/productos',
+    name: 'RestauranteProductos',
+    component: () => import('@/views/restaurante/RestauranteProductos.vue'),
+    props: true,
+    meta: { requiresAuth: true }
+  },
+  
+  // Ruta de login (sin autenticación requerida)
   {
     path: '/login',
     name: 'Login',
