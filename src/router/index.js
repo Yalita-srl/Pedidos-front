@@ -1,6 +1,6 @@
-// router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
 import RestaurantesLista from '@/views/cliente/RestaurantesLista.vue'
+import PaymentView from '@/views/cliente/PaymentView.vue'
 import Login from '@/views/Login.vue' // Importar el componente Login
 import { useAuthStore } from '@/stores/auth'
 
@@ -14,8 +14,14 @@ const routes = [
   {
     path: '/restaurantes/:id/menu',
     name: 'RestauranteMenu',
-    component: () => import('@/views/cliente/RestauranteMenu.vue'), // Ajusta la ruta
+    component: () => import('@/views/cliente/RestauranteMenu.vue'),
     meta: { requiresAuth: true } // Marcar como ruta protegida
+  },
+  {
+    path: '/payment',
+    name: 'Payment',
+    component: PaymentView,
+    meta: { requiresAuth: true } // Agregar protección a la ruta de pago
   },
   {
     path: '/login',
