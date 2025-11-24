@@ -1,8 +1,22 @@
 <template>
-  <div id="app">
-    <NavBarUser v-if="auth.isAuthenticated" />
-    <router-view></router-view>
-    <CarritoSidebar @realizar-pedido="procesarPedidoGlobal" />
+  <div id="app" class="h-screen flex overflow-hidden">
+
+    <!-- SIDEBAR FIJO -->
+    <div class="w-72">
+      <NavBarUser v-if="auth.isAuthenticated" />
+    </div>
+
+    <!-- CONTENIDO DINÁMICO SCROLLEABLE -->
+    <div class="flex-1 overflow-y-auto bg-gray-50">
+      <router-view />
+    </div>
+
+    <!-- CARRITO SUPERPUESTO -->
+    <CarritoSidebar
+      @realizar-pedido="procesarPedidoGlobal"
+      class="absolute top-0 right-0 z-50"
+    />
+
   </div>
 </template>
 

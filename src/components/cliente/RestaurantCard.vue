@@ -16,8 +16,8 @@
       <!-- BADGE ESTADO -->
       <span
         v-if="restaurante.estado"
-        class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold shadow
-               backdrop-blur-md"
+        class="absolute top-3 left-3 z-20 px-3 py-1 rounded-full text-xs font-semibold shadow
+               backdrop-blur-xs"
         :class="restaurante.estado === 'Abierto'
                 ? 'bg-green-500/90 text-white'
                 : 'bg-red-500/90 text-white'"
@@ -28,7 +28,7 @@
       <!-- OVERLAY OSCURO SI ESTÁ CERRADO -->
       <div
         v-if="restaurante.estado === 'Cerrado'"
-        class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        class="absolute inset-0 bg-black/30 backdrop-blur-[2px] z-10"
       ></div>
     </div>
 

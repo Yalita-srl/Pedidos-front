@@ -1,93 +1,103 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-      <div class="text-center">
-        <h1 class="text-3xl font-bold text-gray-800">Iniciar Sesión</h1>
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div class="w-full max-w-sm">
 
-        <p class="mt-2 text-gray-600">Bienvenido a YALA Delivery</p>
+      <!-- LOGO / NOMBRE -->
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-red-500 tracking-tight">
+          YALA
+        </h1>
+        <p class="text-gray-500 mt-1">Delivery App</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="space-y-6">
-        <div>
-          <label for="email" class="text-sm font-medium text-gray-700"
-            >Email</label
-          >
+      <!-- CARD -->
+      <div class="bg-white shadow-xl rounded-3xl p-8 space-y-6">
 
-          <input
-            v-model="email"
-            id="email"
-            type="email"
-            required
-            class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
-          />
-        </div>
+        <h2 class="text-2xl font-bold text-gray-800 text-center">
+          Iniciar sesión
+        </h2>
 
-        <div>
-          <label for="password" class="text-sm font-medium text-gray-700"
-            >Contraseña</label
-          >
+        <p class="text-center text-gray-500 text-sm mb-2">
+          ¡Qué bueno verte de nuevo!
+        </p>
 
-          <input
-            v-model="password"
-            id="password"
-            type="password"
-            required
-            class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
-          />
-        </div>
+        <form @submit.prevent="handleLogin" class="space-y-6">
 
-        <div v-if="error" class="text-red-500 text-sm text-center">
-          {{ error }}
-        </div>
+          <!-- EMAIL -->
+          <div>
+            <label class="text-sm font-semibold text-gray-700">Email</label>
+            <input
+              v-model="email"
+              type="email"
+              required
+              class="mt-1 w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-800 bg-white shadow-sm focus:right-2 focus:ring-red-500/40 outline-none transition-all"
+              placeholder="usuario@gmail.com"
+            />
+          </div>
 
-        <div>
+          <!-- PASSWORD -->
+          <div>
+            <label class="text-sm font-semibold text-gray-700">
+              Contraseña
+            </label>
+            <input
+              v-model="password"
+              type="password"
+              required
+              class="mt-1 w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-800 bg-white shadow-sm focus:right-2 focus:ring-red-500/40 outline-none transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+
+          <!-- ERROR -->
+          <div v-if="error" class="text-center text-red-500 text-sm font-medium">
+            {{ error }}
+          </div>
+
+          <!-- BOTÓN PRINCIPAL -->
           <button
             type="submit"
             :disabled="loading"
-            class="w-full py-2 px-4 font-semibold text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+            class="w-full py-3 rounded-xl text-white font-bold text-lg bg-red-500 hover:bg-red-600 transition-all disabled:opacity-50 shadow-md"
           >
             <span v-if="loading">Ingresando...</span>
-
             <span v-else>Ingresar</span>
           </button>
-        </div>
-      </form>
+        </form>
 
-      <div class="text-center">
-        <router-link to="/" class="text-sm text-red-500 hover:underline"
-          >Volver al inicio</router-link
-        >
+        <div class="text-center">
+          <router-link
+            to="/"
+            class="text-red-500 text-sm font-medium hover:underline"
+          >
+            Registrate aquí
+          </router-link>
+        </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-
 import { useAuthStore } from "@/stores/auth";
 
 const email = ref("");
-
 const password = ref("");
-
 const error = ref(null);
-
 const loading = ref(false);
 
 const authStore = useAuthStore();
 
 async function handleLogin() {
   error.value = null;
-
   loading.value = true;
 
   try {
     await authStore.login(email.value, password.value);
-
-    // La redirección se maneja en el store
   } catch (err) {
-    error.value = "Credenciales incorrectas. Por favor, inténtalo de nuevo.";
+    error.value = "Credenciales incorrectas. Por favor, inténtalo nuevamente.";
   } finally {
     loading.value = false;
   }

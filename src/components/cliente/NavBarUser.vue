@@ -3,11 +3,38 @@
     <!-- Botón hamburguesa -->
     <button
       @click="toggleMenu"
-      class="fixed top-4 left-4 z-50 bg-white shadow-md p-2 rounded-xl hover:shadow-lg transition"
+      :class="[
+        'fixed top-4 z-60 bg-white shadow-md p-2 rounded-xl hover:shadow-lg transition-all duration-300 lg:hidden',
+        open ? 'left-72' : 'left-4'
+      ]"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      <!-- Icono dependiente del estado -->
+      <svg
+        v-if="!open"
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-7 h-7 text-gray-700"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <!-- HAMBURGUESA -->
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
       </svg>
+
+      <svg
+        v-else
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-7 h-7 text-gray-700"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <!-- ICONO X (cerrar) -->
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12" />
+      </svg>
+
     </button>
 
     <div
@@ -20,12 +47,13 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed top-0 left-0 z-50 h-full w-72 bg-white shadow-2xl transform transition-all duration-300',
-        open ? 'translate-x-0' : '-translate-x-full'
+        'h-screen bg-white shadow-2xl border-r border-gray-200 fixed lg:static top-0 left-0 z-50 transform transition-all duration-300 w-72',
+        open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       ]"
     >
+
       <!-- HEADER -->
-      <div class="p-6 border-b border-gray-200 flex items-center gap-3">
+      <div class="p-5 border-b border-gray-200 flex items-center gap-2">
         <div class="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center text-white text-xl font-bold">
           {{ iniciales }}
         </div>
@@ -78,7 +106,8 @@ import {
   UserIcon, 
   ShoppingBagIcon, 
   MapPinIcon, 
-  CreditCardIcon 
+  CreditCardIcon, 
+  HomeIcon
 } from "@heroicons/vue/24/outline";
 
 const router = useRouter();
@@ -105,6 +134,7 @@ const iniciales = computed(() => {
 
 // Acciones del menú
 const menuItems = [
+  { text: "Inicio", icon: HomeIcon, action: () => router.push("/") },
   { text: "Mi Perfil", icon: UserIcon, action: () => router.push("/perfil") },
   { text: "Mis Compras", icon: ShoppingBagIcon, action: () => router.push("/mis-compras") },
   { text: "Direcciones", icon: MapPinIcon, action: () => router.push("/direcciones") },

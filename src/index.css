@@ -10,14 +10,8 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-/* Cuando el menú está abierto desplazamos toda la app */
-.menu-open #app {
-  transform: translateX(5px);
-  transition: transform 0.3s ease;
-}
-
 /* Normal */
 #app {
-  transition: transform 0.3s ease;
+  transition: transform 0.5s ease;
 }
 
