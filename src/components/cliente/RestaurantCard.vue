@@ -1,60 +1,64 @@
 <template>
   <div
-    class="cursor-pointer rounded-2xl overflow-hidden bg-white shadow-[0_2px_12px_rgba(0,0,0,0.05)]
-           hover:shadow-[0_6px_20px_rgba(0,0,0,0.12)] transition-all duration-200"
-    @click="$emit('click')"
+    :class="[
+      'rounded-2xl bg-white overflow-hidden shadow-md transition-all',
+      restaurante.estado === 'Abierto'
+        ? 'cursor-pointer hover:shadow-xl'
+        : 'cursor-not-allowed opacity-75'
+    ]"
+    @click="restaurante.estado === 'Abierto' && $emit('click')"
   >
 
-    <!-- CONTENEDOR IMAGEN -->
-    <div class="relative">
+    <!-- CONTENEDOR FIJO PARA EVITAR DISTORSIÓN -->
+    <div class="relative w-full aspect-[16/9] overflow-hidden">
+
+      <!-- IMAGEN SIEMPRE PROPORCIONAL -->
       <img
         :src="restaurante.imagen || '/img/banner-restaurante.avif'"
-        class="w-full h-40 object-cover"
-        loading="lazy"
+        class="absolute inset-0 w-full h-full object-cover"
       />
 
-      <!-- BADGE ESTADO -->
+      <!-- BADGE ESTADO (siempre adelante) -->
       <span
-        v-if="restaurante.estado"
-        class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold shadow
-               backdrop-blur-md"
+        class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold shadow-lg z-20"
         :class="restaurante.estado === 'Abierto'
-                ? 'bg-green-500/90 text-white'
-                : 'bg-red-500/90 text-white'"
+          ? 'bg-green-600 text-white'
+          : 'bg-red-600 text-white'"
       >
         {{ restaurante.estado }}
       </span>
 
-      <!-- OVERLAY OSCURO SI ESTÁ CERRADO -->
+      <!-- overlay SOLO si cerrado (no tapa el badge) -->
       <div
         v-if="restaurante.estado === 'Cerrado'"
-        class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"
+        class="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10"
       ></div>
+
     </div>
 
-    <!-- INFO -->
-    <div class="p-4">
-      <h3 class="font-semibold text-lg text-gray-800 leading-snug">
+    <!-- INFORMACIÓN -->
+    <div class="p-4 space-y-1.5">
+      <h3 class="font-semibold text-lg text-gray-900 leading-tight">
         {{ restaurante.nombre }}
       </h3>
 
-      <p class="text-sm text-gray-500 mt-0.5">
+      <p class="text-sm text-gray-500">
         {{ restaurante.direccion }}
       </p>
 
-      <!-- ETIQUETAS -->
-      <div class="flex items-center gap-2 mt-3 text-sm text-gray-600">
+      <div class="flex items-center gap-2 pt-2">
 
-        <span class="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-medium">
-          {{ restaurante.tiempoEntrega || '20–30 min' }}
+        <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-800">
+          {{ restaurante.tiempoEntrega || "20–30 min" }}
         </span>
 
-        <span class="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-medium">
-          {{ restaurante.costoEnvio || 'Envío desde 5 Bs' }}
+        <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-800">
+          {{ restaurante.costoEnvio || "Envío desde 5 Bs" }}
         </span>
 
       </div>
     </div>
+
   </div>
 </template>
 

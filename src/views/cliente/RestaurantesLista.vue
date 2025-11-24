@@ -136,7 +136,7 @@ const restaurantesFiltrados = computed(() => {
       filtroCategoria.value === null ||
       r.categorias?.some(c => c.nombre === filtroCategoria.value);
 
-    return matchesSearch && matchesCategoria && r.estado === 'Abierto';
+    return matchesSearch && matchesCategoria;
   });
 });
 
