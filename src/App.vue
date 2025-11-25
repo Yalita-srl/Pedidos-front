@@ -1,37 +1,45 @@
-<!-- App.vue -->
 <template>
-  <div id="app">
-    <router-view></router-view>
-    <CarritoSidebar 
+  <div id="app" class="h-screen flex overflow-hidden">
+
+    <!-- SIDEBAR FIJO -->
+    <div class="w-72">
+      <NavBarUser v-if="auth.isAuthenticated" />
+    </div>
+
+    <!-- CONTENIDO DINÁMICO SCROLLEABLE -->
+    <div class="flex-1 overflow-y-auto bg-gray-50">
+      <router-view />
+    </div>
+
+    <!-- CARRITO SUPERPUESTO -->
+    <CarritoSidebar
       @realizar-pedido="procesarPedidoGlobal"
+      class="absolute top-0 right-0 z-50"
     />
+
   </div>
 </template>
 
 <script>
+import { useAuthStore } from "@/stores/auth";
 import CarritoSidebar from '@/components/cliente/Carrito.vue';
+import NavBarUser from '@/components/cliente/NavBarUser.vue';
 
 export default {
   name: 'App',
   components: {
-    CarritoSidebar
+    CarritoSidebar,
+    NavBarUser
+  },
+  setup() {
+    const auth = useAuthStore();
+    return { auth };
   },
   methods: {
     procesarPedidoGlobal(pedidoData) {
       console.log('Pedido global:', pedidoData);
-      // Aquí puedes redirigir a la página de checkout
-      // o mostrar un modal de confirmación
       alert(`Pedido realizado!\nTotal: ${pedidoData.total}\n\nRedirigiendo al checkout...`);
     }
   }
 };
 </script>
-
-<style>
-#app {
-  width: 100%;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-</style>
