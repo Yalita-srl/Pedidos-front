@@ -10,7 +10,7 @@
   >
 
     <!-- CONTENEDOR FIJO PARA EVITAR DISTORSIÓN -->
-    <div class="relative w-full aspect-[16/9] overflow-hidden">
+    <div class="relative w-full aspect-video overflow-hidden">
 
       <!-- IMAGEN SIEMPRE PROPORCIONAL -->
       <img
@@ -48,7 +48,7 @@
         {{ restaurante.direccion }}
       </p>
 
-      <div class="flex items-center gap-2 pt-2">
+      <!-- <div class="flex items-center gap-2 pt-2">
 
         <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-medium text-gray-800">
           {{ restaurante.tiempoEntrega || "20–30 min" }}
@@ -58,7 +58,7 @@
           {{ restaurante.costoEnvio || "Envío desde 5 Bs" }}
         </span>
 
-      </div>
+      </div> -->
     </div>
 
   </div>
