@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto px-4 pt-12">
 
     <!-- HEADER DE AUTENTICACIÓN -->
-    <header class="flex justify-between items-center mb-6">
+    <!-- <header class="flex justify-between items-center mb-6">
       <div v-if="authStore.isAuthenticated" class="text-sm text-gray-600">
         Bienvenido, <span class="font-semibold">{{ authStore.user?.email }}</span>
       </div>
@@ -23,9 +23,9 @@
           Iniciar Sesión
         </router-link>
       </div>
-    </header>
+    </header> -->
 
-    <!-- TITULO MEJORADO (tu versión) -->
+    <!-- TITULO -->
     <header class="text-center mb-10">
       <h1 class="text-3xl font-bold text-gray-900">Restaurantes Disponibles</h1>
       <p class="text-gray-500 mt-1">
@@ -38,7 +38,6 @@
       class="relative overflow-hidden rounded-3xl px-8 pt-10 pb-10 text-white shadow-lg 
              bg-linear-to-r from-red-600 to-red-400 mb-10">
 
-      <!-- LOGO + TEXTO -->
       <div class="flex items-center gap-4 mx-4 relative z-10">
         <img src="/img/logo-yala.png" class="w-24 h-24 rounded-2xl shadow-lg" />
         <div>
@@ -47,7 +46,6 @@
         </div>
       </div>
 
-      <!-- ONDA SUPERIOR (tu versión mejorada) -->
       <svg
         class="absolute top-0 left-0 w-full opacity-20 pointer-events-none"
         viewBox="0 0 500 150"

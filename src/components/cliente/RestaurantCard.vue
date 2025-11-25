@@ -20,7 +20,9 @@
 
       <!-- BADGE ESTADO (siempre adelante) -->
       <span
-        class="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold shadow-lg z-20"
+        v-if="restaurante.estado"
+        class="absolute top-3 left-3 z-20 px-3 py-1 rounded-full text-xs font-semibold shadow
+               backdrop-blur-xs"
         :class="restaurante.estado === 'Abierto'
           ? 'bg-green-600 text-white'
           : 'bg-red-600 text-white'"
@@ -28,10 +30,10 @@
         {{ restaurante.estado }}
       </span>
 
-      <!-- overlay SOLO si cerrado (no tapa el badge) -->
+      <!-- overlay SOLO si esta cerrado -->
       <div
         v-if="restaurante.estado === 'Cerrado'"
-        class="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10"
+        class="absolute inset-0 bg-black/30 backdrop-blur-[2px] z-10"
       ></div>
 
     </div>
