@@ -67,18 +67,12 @@
 </template>
 
 <script setup>
-/*
-  RestauranteMenu.vue
-  - Usa componentes modulares en src/components/cliente/menu/
-  - Tailwind para estilos
-  - Interactúa con carritoStore para agregar / actualizar cantidades
-  - Comentarios añadidos donde hace falta decisión humana
-*/
 
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useCarritoStore } from "@/stores/carritoStore";
 import { getRestaurante } from "@/services/catalogoService";
+import useNotification from "@/composables/useNotification";
 
 /* Componentes (todos en components/cliente/menu/) */
 import RestaurantBanner from "@/components/cliente/menu/RestaurantBanner.vue";
@@ -102,12 +96,7 @@ const loading = ref(true);
 const error = ref(null);
 
 const categoriaSeleccionada = ref(null);
-
-/*
-  Cantidades temporales: objeto { [productoId]: number }
-  - Permite incrementar/decrementar antes de "Añadir al pedido"
-  - Si el producto ya está en el carrito, inicializamos la cantidad con la del carrito
-*/
+const { push } = useNotification();
 const cantidades = ref({});
 
 /* Control del carrito lateral (para abrir/cerrar desde la vista) */
@@ -200,13 +189,13 @@ function agregarAlCarrito(producto) {
   const cantidad = getCantidadProducto(id);
 
   if (cantidad <= 0) {
-    // UX: evita enviar cantidades 0
-    // Aquí un humano podría querer un toast en lugar de alert
-    alert("Selecciona al menos 1 unidad antes de agregar.");
+    push({
+      message: "Selecciona una cantidad antes de agregar.",
+      type: "error"
+    });
     return;
   }
 
-  // Información mínima del restaurante para guardar en el carrito
   const restauranteInfo = {
     id: restaurante.value.id,
     nombre: restaurante.value.nombre,
@@ -214,13 +203,19 @@ function agregarAlCarrito(producto) {
     telefono: restaurante.value.telefono
   };
 
-  // Llamada al store — asumo que agregarProducto tiene la firma (producto, cantidad, restauranteInfo)
   carritoStore.agregarProducto(producto, cantidad, restauranteInfo);
 
-  // opcional: resetear la cantidad temporal (decisión de UX)
+  // Opcional: Resetear cantidades
   cantidades.value[id] = 0;
 
-  // abrir carrito automáticamente para feedback al usuario
+  // 🔥 AQUI sale tu banner bonito
+  push({
+    message: `Producto añadido: ${producto.nombre}`,
+    type: "success",
+    duration: 2500
+  });
+
+  // abrir el carrito para feedback visual
   carritoVisible.value = true;
 }
 

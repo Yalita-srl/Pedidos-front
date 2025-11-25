@@ -17,6 +17,7 @@
       class="absolute top-0 right-0 z-50"
     />
 
+    <NotificationProvider />
   </div>
 </template>
 
@@ -24,12 +25,14 @@
 import { useAuthStore } from "@/stores/auth";
 import CarritoSidebar from '@/components/cliente/Carrito.vue';
 import NavBarUser from '@/components/cliente/NavBarUser.vue';
+import NotificationProvider from "@/components/NotificationProvider.vue";
 
 export default {
   name: 'App',
   components: {
     CarritoSidebar,
-    NavBarUser
+    NavBarUser,
+    NotificationProvider, 
   },
   setup() {
     const auth = useAuthStore();
