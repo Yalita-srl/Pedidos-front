@@ -59,8 +59,15 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+
+  {
+    path: "/perfil",
+    name: "Perfil",
+    component: () => import("@/views/cliente/ProfileView.vue"),
+    meta: { requiresAuth: true }
   }
-  // Agrega más rutas según necesites
+
 ]
 
 const router = createRouter({
