@@ -14,8 +14,10 @@
 
       <!-- IMAGEN SIEMPRE PROPORCIONAL -->
       <img
-        :src="restaurante.imagen || '/img/banner-restaurante.avif'"
+        :src="obtenerImagen(restaurante)"
+        :alt="restaurante.nombre"
         class="absolute inset-0 w-full h-full object-cover"
+        @error="manejarErrorImagen"
       />
 
       <!-- BADGE ESTADO (siempre adelante) -->
@@ -65,7 +67,37 @@
 </template>
 
 <script setup>
-defineProps({
+import { defineProps, ref } from 'vue'
+
+const props = defineProps({
   restaurante: Object
 });
+
+// Debug
+console.log('RestaurantCard restaurante:', props.restaurante);
+
+// Función para manejar la imagen
+const obtenerImagen = (restaurante) => {
+  // Prioridad: imagen_url > imagen > default
+  if (restaurante.imagen_url) {
+    return restaurante.imagen_url;
+  }
+  
+  if (restaurante.imagen) {
+    // Si la imagen es una ruta relativa, construir la URL completa
+    if (restaurante.imagen.startsWith('restaurantes/')) {
+      return `http://localhost:8000/storage/${restaurante.imagen}`;
+    }
+    return restaurante.imagen;
+  }
+  
+  // Imagen por defecto
+  return '/img/banner-restaurante.avif';
+};
+
+// Manejar errores de carga de imagen
+const manejarErrorImagen = (event) => {
+  console.warn('Error cargando imagen:', event.target.src);
+  event.target.src = '/img/banner-restaurante.avif';
+};
 </script>

@@ -1,4 +1,5 @@
 <template>
+  
   <section
     class="relative overflow-hidden rounded-3xl px-8 pt-12 pb-12 text-white shadow-lg 
            bg-linear-to-r from-red-600 to-red-400 mb-10"

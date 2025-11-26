@@ -7,7 +7,7 @@
       :direccion="restaurante?.direccion || ''"
       :telefono="restaurante?.telefono || ''"
       :estado="restaurante?.estado || 'Cerrado'"
-      :imagen="restaurante?.imagen ?? '/img/logo-yala.png'"
+      :imagen="'/img/logo-yala.png'"
       :showBack="true"
       @volver="volver"
     />
