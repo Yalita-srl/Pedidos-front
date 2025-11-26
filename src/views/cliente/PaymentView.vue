@@ -107,12 +107,12 @@ async function procesarPago() {
     push({
       type: "success",
       title: "Pago exitoso",
-      message: "Tu pedido está en proceso 🎉"
+      message: "Pago exitoso 🎉"
     });
 
     setTimeout(() => {
       router.push("/");
-    }, 1200);
+    }, 2000);
 
   } catch (error) {
     push({

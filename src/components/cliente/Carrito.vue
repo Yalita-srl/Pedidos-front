@@ -158,6 +158,11 @@
 <script>
 import { useCarritoStore } from '@/stores/carritoStore';
 import { crearOrden } from "@/services/orderService";
+import { useNotification } from "@/composables/useNotification";
+
+const { push } = useNotification();
+
+
 
 export default {
   name: 'CarritoSidebar',
@@ -243,8 +248,12 @@ export default {
         });
 
       } catch (error) {
-        console.error("Error al crear la orden:", error);
-        alert("No se pudo crear la orden.");
+        //console.error("Error al crear la orden:", error);
+        push({
+          message: "Error al procesar el pedido. Intenta nuevamente.",
+          type: "error",
+          duration: 3000
+        });
       }
     },
     

@@ -21,7 +21,7 @@
 
       <div class="flex justify-between items-end">
         <div class="text-sm">
-          <p class="uppercase text-gray-200 text-xs">Cardholder</p>
+          <p class="uppercase text-gray-200 text-xs">Nobre de Tarjeta</p>
           <p class="font-semibold">
             {{ card.name || "Nombre y Apellido" }}
           </p>
@@ -53,7 +53,7 @@
                    outline-none transition-all font-mono tracking-widest"
           />
 
-          <img src="/public/img/tarjeta.png" class="w-10 absolute right-3 top-3" />
+          <img src="/public/img/tarjeta.png" class="w-10 absolute right-3 top-2" />
         </div>
       </div>
 
@@ -64,6 +64,7 @@
         <div>
           <label class="block font-semibold text-gray-700 mb-1">Expira</label>
 
+          <!-- Formato MM/AA -->
           <input
             type="text"
             maxlength="5"

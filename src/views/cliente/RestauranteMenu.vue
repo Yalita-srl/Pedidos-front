@@ -237,8 +237,6 @@ function onCarritoCerrado() {
 
 /* Evento cuando se complete el pedido (delegado desde CarritoSidebar) */
 function onRealizarPedido(pedidoData) {
-  // Nota: pedidoData lo maneja el CarritoSidebar — aquí sólo damos feedback
-  // Un humano podría querer redirigir a /payment o mostrar un modal
   console.log("Pedido realizado:", pedidoData);
   carritoVisible.value = false;
 }
@@ -270,24 +268,14 @@ function getImagenUrl(path) {
   return `http://localhost:8000/storage/${path}`;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Nota para humanos:                                                           
-   - Revisa la firma de tus métodos en carritoStore (agregarProducto, cantidadProducto).
-   - Si tu store usa nombres distintos, adapta las llamadas arriba.
-   - Considera reemplazar alert() por un toast (p. ej. Toastify / headlessui / custom).
-   - Si quieres que al agregar no se resetee cantidad, cambia la línea que setea a 0.
-*/ 
 </script>
 
 <style scoped>
-/* Pequeñas utilidades locales (la mayor parte es Tailwind).
-   Si quieres removerlas y moverlas a Tailwind config, dime y lo hago. */
 
 .menu-container {
   /* placeholder si antes usabas esta clase */
 }
 
-/* Si usas line-clamp en cards y no está en tu config, puedes incluir una clase simple: */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
