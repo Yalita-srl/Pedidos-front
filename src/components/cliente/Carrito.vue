@@ -234,7 +234,7 @@ export default {
           })),
         };
 
-        console.log("📦 Payload enviado al backend:", JSON.stringify(orderPayload, null, 2));
+        //console.log("📦 Payload enviado al backend:", JSON.stringify(orderPayload, null, 2));
 
         const order = await crearOrden(orderPayload);
 

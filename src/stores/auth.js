@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
           },
         }),
       })
+      //console.log("🔑 Token recibido del backend:", authToken);
 
       const result = await response.json()
 

@@ -53,7 +53,7 @@
                    outline-none transition-all font-mono tracking-widest"
           />
 
-          <img src="/public/img/tarjeta.png" class="w-10 absolute right-3 top-2" />
+          <img src="/img/tarjeta.png" class="w-10 absolute right-3 top-2" />
         </div>
       </div>
 
@@ -158,7 +158,7 @@ export default {
         cvv: "",
         name: ""
       },
-      pedido: null, // lo recibes vía props o lo puedes levantar aquí si deseas
+      pedido: null,
     };
   },
 

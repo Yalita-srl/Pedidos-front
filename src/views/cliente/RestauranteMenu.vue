@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-7xl mx-auto px-6 py-8">
 
-    <!-- Banner / Header (componente reutilizable) -->
+    <!-- Banner -->
     <RestaurantBanner
       :nombre="restaurante?.nombre || 'Restaurante'"
       :direccion="restaurante?.direccion || ''"
@@ -12,10 +12,10 @@
       @volver="volver"
     />
 
-    <!-- Aviso de multi-restaurante (si aplica) -->
+    <!-- Aviso multi-restaurante -->
     <RestaurantMultiStoreWarning v-if="tieneProductosDeOtrosRestaurantes" />
 
-    <!-- Tabs de categorías -->
+    <!-- Tabs categorías -->
     <div v-if="restaurante && restaurante.categorias?.length" class="mb-6">
       <RestaurantCategoryTabs
         :categorias="restaurante.categorias"
@@ -24,11 +24,13 @@
       />
     </div>
 
-    <!-- Contenido principal -->
+    <!-- Grid de productos -->
     <div>
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">
         {{ tituloSeccion }}
-        <span class="text-sm text-gray-500 font-normal ml-2">({{ productosFiltrados.length }} productos)</span>
+        <span class="text-sm text-gray-500 font-normal ml-2">
+          ({{ productosFiltrados.length }} productos)
+        </span>
       </h2>
 
       <RestaurantProductGrid>
@@ -54,13 +56,13 @@
       </RestaurantProductGrid>
     </div>
 
-    <!-- Carrito lateral reutilizable -->
+    <!-- Carrito lateral -->
     <CarritoSidebar
       :abierto="carritoVisible"
       @abrir="onCarritoAbierto"
       @cerrar="onCarritoCerrado"
       @realizar-pedido="onRealizarPedido"
-      class="!z-[1200]"
+      class="z-1200"
     />
 
   </div>
@@ -70,216 +72,177 @@
 
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useCarritoStore } from "@/stores/carritoStore";
-import { getRestaurante } from "@/services/catalogoService";
-import useNotification from "@/composables/useNotification";
 
-/* Componentes (todos en components/cliente/menu/) */
+/* Stores */
+import { useCarritoStore } from "@/stores/carritoStore";
+
+/* Servicios */
+import { getRestaurante } from "@/services/catalogoService";
+
+/* Notificaciones */
+import useNotification from "@/composables/useNotification";
+const { push } = useNotification();
+
+/* Componentes */
 import RestaurantBanner from "@/components/cliente/menu/RestaurantBanner.vue";
 import RestaurantCategoryTabs from "@/components/cliente/menu/RestaurantCategoryTabs.vue";
 import RestaurantProductCard from "@/components/cliente/menu/RestaurantProductCard.vue";
 import RestaurantProductGrid from "@/components/cliente/menu/RestaurantProductGrid.vue";
 import RestaurantEmptyState from "@/components/cliente/menu/RestaurantEmptyState.vue";
 import RestaurantMultiStoreWarning from "@/components/cliente/menu/RestaurantMultiStoreWarning.vue";
-
-/* Componente de carrito (ya existente en tu proyecto) */
 import CarritoSidebar from "@/components/cliente/Carrito.vue";
 
-/* Router & stores */
+/* Router y store carrito */
 const router = useRouter();
 const route = useRoute();
 const carritoStore = useCarritoStore();
 
-/* Local state */
+/* Estado local */
 const restaurante = ref(null);
-const loading = ref(true);
-const error = ref(null);
-
 const categoriaSeleccionada = ref(null);
-const { push } = useNotification();
 const cantidades = ref({});
-
-/* Control del carrito lateral (para abrir/cerrar desde la vista) */
 const carritoVisible = ref(false);
+const loading = ref(true);
 
-/* -------------------------------------------------------------------------- */
-/*  CARGA DEL RESTAURANTE                                                      */
-/* -------------------------------------------------------------------------- */
-onMounted(() => {
-  fetchRestaurante();
-});
-
-async function fetchRestaurante() {
-  loading.value = true;
-  error.value = null;
+/* ---------------------------------------------------
+    Cargar restaurante y productos al montar vista
+--------------------------------------------------- */
+onMounted(async () => {
   try {
-    const id = route.params.id;
-    const resp = await getRestaurante(id);
-    restaurante.value = resp.data;
+    loading.value = true;
 
-    // Inicializar cantidades con lo que haya en el carrito para este restaurante
-    if (restaurante.value?.productos?.length) {
-      restaurante.value.productos.forEach((p) => {
-        const q = carritoStore.cantidadProducto(p.id) || 0;
-        if (q > 0) cantidades.value[p.id] = q;
-      });
-    }
+    const id = route.params.id;
+
+    //console.log("Solicitando restaurante:", id);
+
+    const response = await getRestaurante(id);
+
+    //console.log("Respuesta cruda del backend:", response);
+
+    restaurante.value = response.data; // <-- FIX IMPORTANTE
+
+    //console.log("Restaurante procesado:", restaurante.value);
+
+    categoriaSeleccionada.value = null;
+
   } catch (err) {
-    console.error(err);
-    error.value = "No se pudo cargar el restaurante. Intenta más tarde.";
+    console.error("Error cargando restaurante:", err);
+    push({
+      type: "error",
+      message: "No se pudo cargar el menú del restaurante."
+    });
   } finally {
     loading.value = false;
   }
-}
+});
 
-/* -------------------------------------------------------------------------- */
-/*  FILTRADO / UTILIDADES                                                       */
-/* -------------------------------------------------------------------------- */
-
+/* ---------------------------------------------------
+    Cálculo de productos
+--------------------------------------------------- */
 const productosFiltrados = computed(() => {
   if (!restaurante.value?.productos) return [];
 
-  if (categoriaSeleccionada.value === null) {
+  if (categoriaSeleccionada.value === null)
     return restaurante.value.productos;
-  }
 
   return restaurante.value.productos.filter(
-    (p) => p.categoria_id === categoriaSeleccionada.value
+    p => p.categoria_id === categoriaSeleccionada.value
   );
 });
 
 const tituloSeccion = computed(() => {
   if (!restaurante.value) return "Menú";
+
   if (categoriaSeleccionada.value === null) return "Nuestro Menú";
-  const cat = restaurante.value.categorias?.find(c => c.id === categoriaSeleccionada.value);
+
+  const cat = restaurante.value.categorias?.find(
+    c => c.id === categoriaSeleccionada.value
+  );
+
   return cat ? cat.nombre : "Menú";
 });
 
-/* -------------------------------------------------------------------------- */
-/*  CANTIDADES: helpers                                                        */
-/* -------------------------------------------------------------------------- */
-
-function getCantidadProducto(productoId) {
-  // prioridad: cantidades temporales -> cantidad en carrito -> 0
-  return cantidades.value[productoId] ?? carritoStore.cantidadProducto(productoId) ?? 0;
+/* ---------------------------------------------------
+    Manejo de cantidades y carrito
+--------------------------------------------------- */
+function getCantidadProducto(id) {
+  return cantidades.value[id] ?? carritoStore.cantidadProducto(id) ?? 0;
 }
 
-function cantidadEnCarrito(productoId) {
-  return carritoStore.cantidadProducto(productoId) ?? 0;
+function cantidadEnCarrito(id) {
+  return carritoStore.cantidadProducto(id) ?? 0;
 }
 
 function incrementarCantidad(producto) {
   const id = producto.id;
   if (!cantidades.value[id]) cantidades.value[id] = cantidadEnCarrito(id) || 0;
-  cantidades.value[id] = (cantidades.value[id] || 0) + 1;
+  cantidades.value[id]++;
 }
 
 function decrementarCantidad(producto) {
   const id = producto.id;
   if (!cantidades.value[id]) cantidades.value[id] = cantidadEnCarrito(id) || 0;
-  if ((cantidades.value[id] || 0) > 0) cantidades.value[id] = cantidades.value[id] - 1;
+  if (cantidades.value[id] > 0) cantidades.value[id]--;
 }
-
-/* -------------------------------------------------------------------------- */
-/*  CARrito: agregar / abrir / cerrar                                           */
-/* -------------------------------------------------------------------------- */
 
 function agregarAlCarrito(producto) {
   const id = producto.id;
   const cantidad = getCantidadProducto(id);
 
   if (cantidad <= 0) {
-    push({
-      message: "Selecciona una cantidad antes de agregar.",
-      type: "error"
-    });
+    push({ type: "error", message: "Selecciona una cantidad válida." });
     return;
   }
 
-  const restauranteInfo = {
+  carritoStore.agregarProducto(producto, cantidad, {
     id: restaurante.value.id,
     nombre: restaurante.value.nombre,
     direccion: restaurante.value.direccion,
     telefono: restaurante.value.telefono
-  };
+  });
 
-  carritoStore.agregarProducto(producto, cantidad, restauranteInfo);
-
-  // Opcional: Resetear cantidades
   cantidades.value[id] = 0;
 
-  // 🔥 AQUI sale tu banner bonito
   push({
-    message: `Producto añadido: ${producto.nombre}`,
     type: "success",
+    message: `Producto añadido: ${producto.nombre}`,
     duration: 2500
   });
 
-  // abrir el carrito para feedback visual
   carritoVisible.value = true;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Helpers UI / navegación                                                    */
-/* -------------------------------------------------------------------------- */
-
-function volver() {
-  router.push({ name: "Restaurantes" });
-}
-
-/* Eventos del carrito (recibidos desde CarritoSidebar) */
+/* ---------------------------------------------------
+    Carrito lateral
+--------------------------------------------------- */
 function onCarritoAbierto() {
   carritoVisible.value = true;
 }
+
 function onCarritoCerrado() {
   carritoVisible.value = false;
 }
 
-/* Evento cuando se complete el pedido (delegado desde CarritoSidebar) */
-function onRealizarPedido(pedidoData) {
-  console.log("Pedido realizado:", pedidoData);
+function onRealizarPedido(pedido) {
+  console.log("Pedido realizado:", pedido);
   carritoVisible.value = false;
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Computed booleans útiles                                                    */
-/* -------------------------------------------------------------------------- */
-
+/* ---------------------------------------------------
+    Cálculos secundarios
+--------------------------------------------------- */
 const tieneProductosDeEsteRestaurante = computed(() =>
   carritoStore.items.some(item => item.restaurante.id === restaurante.value?.id)
-);
-
-const totalItemsDeEsteRestaurante = computed(() =>
-  carritoStore.items
-    .filter(item => item.restaurante.id === restaurante.value?.id)
-    .reduce((sum, it) => sum + it.cantidad, 0)
 );
 
 const tieneProductosDeOtrosRestaurantes = computed(() =>
   carritoStore.items.some(item => item.restaurante.id !== restaurante.value?.id)
 );
 
-/* -------------------------------------------------------------------------- */
-/*  UTIL: construir url de imagen (puedes adaptar si tu API cambia)            */
-/* -------------------------------------------------------------------------- */
-function getImagenUrl(path) {
-  if (!path) return "/img/logo-yala.png";
-  // Adjustar base si fuera necesario (consistencia con el resto del proyecto)
-  return `http://localhost:8000/storage/${path}`;
+/* ---------------------------------------------------
+    Navegación
+--------------------------------------------------- */
+function volver() {
+  router.push({ name: "Restaurantes" });
 }
-
 </script>
-
-<style scoped>
-
-.menu-container {
-  /* placeholder si antes usabas esta clase */
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-</style>

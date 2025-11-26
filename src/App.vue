@@ -1,23 +1,23 @@
 <template>
+  <NotificationProvider />
   <div id="app" class="h-screen flex overflow-hidden">
-
+    
     <!-- SIDEBAR FIJO -->
     <div class="w-72">
       <NavBarUser v-if="auth.isAuthenticated" />
     </div>
-
-    <!-- CONTENIDO DINÁMICO SCROLLEABLE -->
+    
+    <!-- CONTENIDO DINÁMICO -->
     <div class="flex-1 overflow-y-auto bg-gray-50">
       <router-view />
     </div>
-
-    <!-- CARRITO SUPERPUESTO -->
+    
+    <!-- CARRITO -->
     <CarritoSidebar
-      @realizar-pedido="procesarPedidoGlobal"
-      class="absolute top-0 right-0 z-50"
+    @realizar-pedido="procesarPedidoGlobal"
+    class="absolute top-0 right-0 z-50"
     />
-
-    <NotificationProvider />
+    
   </div>
 </template>
 
