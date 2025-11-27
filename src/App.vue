@@ -13,24 +13,24 @@
     </div>
     
     <!-- CARRITO -->
-    <CarritoSidebar
+    <!-- <CarritoSidebar
     @realizar-pedido="procesarPedidoGlobal"
     class="absolute top-0 right-0 z-50"
-    />
+    /> -->
     
   </div>
 </template>
 
 <script>
 import { useAuthStore } from "@/stores/auth";
-import CarritoSidebar from '@/components/cliente/Carrito.vue';
+// import CarritoSidebar from '@/components/cliente/Carrito.vue';
 import NavBarUser from '@/components/cliente/NavBarUser.vue';
 import NotificationProvider from "@/components/NotificationProvider.vue";
 
 export default {
   name: 'App',
   components: {
-    CarritoSidebar,
+    // CarritoSidebar,
     NavBarUser,
     NotificationProvider, 
   },
@@ -38,11 +38,11 @@ export default {
     const auth = useAuthStore();
     return { auth };
   },
-  methods: {
-    procesarPedidoGlobal(pedidoData) {
-      console.log('Pedido global:', pedidoData);
-      alert(`Pedido realizado!\nTotal: ${pedidoData.total}\n\nRedirigiendo al checkout...`);
-    }
-  }
+  // methods: {
+  //   procesarPedidoGlobal(pedidoData) {
+  //     console.log('Pedido global:', pedidoData);
+  //     alert(`Pedido realizado!\nTotal: ${pedidoData.total}\n\nRedirigiendo al checkout...`);
+  //   }
+  // }
 };
 </script>

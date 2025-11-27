@@ -90,6 +90,11 @@
         </button>
       </div>
     </aside>
+     <!-- CARRITO -->
+    <CarritoSidebar
+    @realizar-pedido="procesarPedidoGlobal"
+    class="absolute top-0 right-0 z-50"
+    />
   </div>
 </template>
 
@@ -100,6 +105,8 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { onUnmounted } from "vue";
+import CarritoSidebar from '@/components/cliente/Carrito.vue';
+
 
 // Heroicons
 import { 
@@ -160,6 +167,10 @@ function logout() {
   auth.logout();
   router.push("/login");
 }
+function procesarPedidoGlobal(pedidoData) {
+    console.log('Pedido global:', pedidoData);
+    alert(`Pedido realizado!\nTotal: ${pedidoData.total}\n\nRedirigiendo al checkout...`);
+  }
 </script>
 
 <style scoped>
