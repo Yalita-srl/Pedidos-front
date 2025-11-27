@@ -66,12 +66,8 @@
         </form>
 
         <div class="text-center">
-          <router-link
-            to="/"
-            class="text-red-500 text-sm font-medium hover:underline"
-          >
-            Registrate aquí
-          </router-link>
+         <Register />
+
         </div>
       </div>
 
@@ -82,6 +78,7 @@
 <script setup>
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import Register from "./Register.vue";
 
 const email = ref("");
 const password = ref("");
