@@ -92,6 +92,7 @@
     </aside>
      <!-- CARRITO -->
     <CarritoSidebar
+    v-if="auth.isAuthenticated && auth.user?.role === 'USER'"
     @realizar-pedido="procesarPedidoGlobal"
     class="absolute top-0 right-0 z-50"
     />
@@ -138,7 +139,6 @@ const iniciales = computed(() => {
     .join("")
     .toUpperCase();
 });
-
 // Acciones del menú
 const menuItems = [
   { text: "Inicio", icon: HomeIcon, action: () => router.push("/") },
