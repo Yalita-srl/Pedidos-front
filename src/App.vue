@@ -14,6 +14,7 @@
     
     <!-- CARRITO -->
     <CarritoSidebar
+     v-if="auth.isAuthenticated && auth.user?.role === 'USER'"
     @realizar-pedido="procesarPedidoGlobal"
     class="absolute top-0 right-0 z-50"
     />
