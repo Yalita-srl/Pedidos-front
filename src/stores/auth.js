@@ -12,7 +12,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email, password) {
     try {
-      const response = await fetch('http://localhost:8080/graphql', {
+      const response = await fetch('http://localhost:8000/graphql', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
           },
         }),
       })
+      //console.log("🔑 Token recibido del backend:", authToken);
 
       const result = await response.json()
 
@@ -59,6 +60,53 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function register({ email, password, name, phone, address, role = "user" }) {
+  try {
+    const response = await fetch("http://localhost:8000/graphql", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `
+          mutation RegisterUser($input: UserInput!) {
+            registerUser(input: $input) {
+              user {
+                id
+                email
+                name
+                role
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            email,
+            password,
+            name,
+            phone,
+            address,
+            role, 
+          },
+        },
+      }),
+    })
+
+    const result = await response.json()
+
+    if (result.errors) {
+      throw new Error(result.errors[0].message)
+    }
+
+    // usuario creado correctamente
+    return result.data.registerUser.user
+
+  } catch (error) {
+    console.error("❌ Error en registro:", error)
+    throw error
+  }
+}
   function logout() {
     token.value = null
     user.value = null
@@ -67,7 +115,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { token, user, isAuthenticated, login, logout }
+  return { token, user, isAuthenticated, login, logout,register }
 }, {
   persist: true,
 })
