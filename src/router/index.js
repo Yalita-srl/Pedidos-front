@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RestaurantesLista from '@/views/cliente/RestaurantesLista.vue'
-import RestauranteForm from '@/components/restaurante/RestauranteForm.vue'
+import RestauranteForm from '@/components/restaurante/RestauranteModal.vue'
 import PaymentView from '@/views/cliente/PaymentView.vue'
 import Login from '@/views/Login.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -30,7 +30,7 @@ const routes = [
   {
     path: '/mis-restaurantes',
     name: 'RestaurantesAdmin',
-    component: () => import('@/views/restaurante/Menu.vue'),
+    component: () => import('@/views/restaurante/Restaurantes.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -49,10 +49,22 @@ const routes = [
   {
     path: '/restaurantes/:id/productos',
     name: 'RestauranteProductos',
-    component: () => import('@/views/restaurante/RestauranteProductos.vue'),
+    component: () => import('@/views/restaurante/Productos.vue'),
     props: true,
     meta: { requiresAuth: true }
   },
+  {
+  path: '/restaurantes/categorias',
+  name: 'GestionCategorias',
+  component: () => import('@/views/restaurante/Categorias.vue'),
+  meta: { requiresAuth: true }
+},
+{
+  path: '/restaurantes/productos',
+  name: 'VistaProductos',
+  component: () => import('@/views/restaurante/TodosProductos.vue'),
+  meta: { requiresAuth: true }
+},
   
   // Ruta de login (sin autenticación requerida)
   {
