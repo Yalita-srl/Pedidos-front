@@ -5,7 +5,7 @@
 
     <!-- FLECHA IZQUIERDA -->
     <button
-      v-if="showLeft"
+      v-show="true"
       @click="scrollLeft"
       class="absolute -left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center 
             bg-red-500 shadow-xl rounded-full hover:bg-red-600 active:scale-95 transition"
@@ -21,7 +21,7 @@
     <!-- CARRUSEL -->
     <div
       ref="carousel"
-      class="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar pb-2"
+      class="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar pb-2 pr-4"
       @scroll="updateArrows"
     >
 
@@ -37,7 +37,7 @@
 
     <!-- FLECHA DERECHA -->
     <button
-      v-if="showRight"
+      v-show="true"
       @click="scrollRight"
       class="absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center 
             bg-red-500 shadow-xl rounded-full hover:bg-red-600 active:scale-95 transition"
