@@ -7,7 +7,7 @@ const { push } = useNotification();
 // Axios para el microservicio de usuarios
 function createUserAxios() {
   const api = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: import.meta.env.VITE_USER_API || "http://localhost:8000",
   });
 
   // Interceptor JWT (Django exige prefix JWT)
