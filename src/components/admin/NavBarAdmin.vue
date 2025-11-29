@@ -55,28 +55,99 @@
       <!-- HEADER -->
       <div class="p-5 border-b border-gray-200 flex items-center gap-2">
         <div class="w-14 h-14 rounded-full bg-red-500 flex items-center justify-center text-white text-xl font-bold">
-          {{ iniciales }}
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
         </div>
         <div>
           <p class="font-semibold text-gray-800">{{ userData.nombre }}</p>
-          <p class="text-sm text-gray-500">{{ userData.email }}</p>
+          <p class="text-sm text-gray-500">Administrador</p>
+          <p class="text-xs text-gray-400">{{ userData.email }}</p>
         </div>
       </div>
 
-      <!-- OPCIONES DEL MENÚ -->
+      <!-- OPCIONES DEL MENÚ ADMIN -->
       <nav class="p-4 space-y-2">
+        <!-- Dashboard -->
         <router-link
-          v-for="item in menuItems"
-          :key="item.text"
-          :to="item.to"
+          to="/admin/dashboard"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
           active-class="bg-red-50 text-red-600"
           @click="closeMenu"
         >
-          <component :is="item.icon" class="w-6 h-6 text-red-500"/>
-          {{ item.text }}
+          <ChartBarSquareIcon class="w-6 h-6 text-red-500" />
+          Dashboard
+        </router-link>
+
+        <!-- Categorías -->
+        <router-link
+          to="/admin/categorias"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          active-class="bg-red-50 text-red-600"
+          @click="closeMenu"
+        >
+          <TagIcon class="w-6 h-6 text-red-500" />
+          Categorías
+        </router-link>
+
+        <!-- Usuarios -->
+        <router-link
+          to="/admin/usuarios"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          active-class="bg-red-50 text-red-600"
+          @click="closeMenu"
+        >
+          <UserGroupIcon class="w-6 h-6 text-red-500" />
+          Usuarios
+        </router-link>
+
+        <!-- Restaurantes -->
+        <router-link
+          to="/admin/restaurantes"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          active-class="bg-red-50 text-red-600"
+          @click="closeMenu"
+        >
+          <BuildingStorefrontIcon class="w-6 h-6 text-red-500" />
+          Restaurantes
+        </router-link>
+
+        <!-- Reportes -->
+        <router-link
+          to="/admin/reportes"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          active-class="bg-red-50 text-red-600"
+          @click="closeMenu"
+        >
+          <ChartPieIcon class="w-6 h-6 text-red-500" />
+          Reportes
+        </router-link>
+
+        <!-- Configuración -->
+        <router-link
+          to="/admin/configuracion"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          active-class="bg-red-50 text-red-600"
+          @click="closeMenu"
+        >
+          <Cog6ToothIcon class="w-6 h-6 text-red-500" />
+          Configuración
         </router-link>
       </nav>
+
+      <!-- SECCIÓN CLIENTE -->
+      <div class="p-4 border-t border-gray-200 mt-4">
+        <p class="text-xs text-gray-400 uppercase font-semibold mb-2 px-4">Vista Cliente</p>
+        <router-link
+          to="/"
+          class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
+          @click="closeMenu"
+        >
+          <HomeIcon class="w-6 h-6 text-red-500" />
+          Ir a Tienda
+        </router-link>
+      </div>
 
       <!-- CERRAR SESIÓN -->
       <div class="absolute bottom-0 w-full p-4 border-t border-gray-200">
@@ -96,19 +167,21 @@
 </template>
 
 <script setup>
-console.log("📌 NavBarUser montado");
+console.log("📌 NavBarAdmin montado");
 
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { onUnmounted } from "vue";
 
-// Heroicons
+// Heroicons para Admin
 import { 
-  UserIcon, 
-  ShoppingBagIcon, 
-  MapPinIcon, 
-  CreditCardIcon, 
+  ChartBarSquareIcon,
+  TagIcon,
+  UserGroupIcon,
+  BuildingStorefrontIcon,
+  ChartPieIcon,
+  Cog6ToothIcon,
   HomeIcon
 } from "@heroicons/vue/24/outline";
 
@@ -120,8 +193,8 @@ const open = ref(false);
 // Datos seguros del usuario
 const userData = computed(() => {
   return auth.user
-    ? { nombre: auth.user.name || "Usuario", email: auth.user.email }
-    : { nombre: "Invitado", email: "----" };
+    ? { nombre: auth.user.name || "Administrador", email: auth.user.email }
+    : { nombre: "Admin", email: "----" };
 });
 
 // Iniciales
@@ -134,37 +207,8 @@ const iniciales = computed(() => {
     .toUpperCase();
 });
 
-// Acciones del menú - Ahora con rutas definidas
-const menuItems = [
-  { 
-    text: "Inicio", 
-    icon: HomeIcon, 
-    to: "/" 
-  },
-  { 
-    text: "Mi Perfil", 
-    icon: UserIcon, 
-    to: "/perfil" 
-  },
-  { 
-    text: "Mis Compras", 
-    icon: ShoppingBagIcon, 
-    to: "/mis-compras" 
-  },
-  { 
-    text: "Direcciones", 
-    icon: MapPinIcon, 
-    to: "/direcciones" 
-  },
-  { 
-    text: "Métodos de Pago", 
-    icon: CreditCardIcon, 
-    to: "/metodos-pago" 
-  },
-];
-
 function closeMenu() {
-  if (open.value) { // Solo si está abierto
+  if (open.value) { 
     setTimeout(() => {
       open.value = false;
       document.body.classList.remove("menu-open");

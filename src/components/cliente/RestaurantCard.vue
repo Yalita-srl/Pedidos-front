@@ -74,7 +74,7 @@ const props = defineProps({
 });
 
 // Debug
-console.log('RestaurantCard restaurante:', props.restaurante);
+//console.log('RestaurantCard restaurante:', props.restaurante);
 
 // Función para manejar la imagen
 const obtenerImagen = (restaurante) => {
