@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     
     switch (normalizedRole) {
       case 'admin':
-        return '/admin'
+        return '/admin/dashboard'
       case 'restaurant_owner':
         return '/mis-restaurantes'
       case 'user':
@@ -32,7 +32,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email, password) {
     try {
-      const response = await fetch('http://localhost:8080/graphql', {
+      
+      const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function register({ email, password, name, phone, address, role = "user" }) {
     try {
-      const response = await fetch("http://localhost:8080/graphql", {
+      const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
