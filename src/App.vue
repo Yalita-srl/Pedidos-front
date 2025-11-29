@@ -1,21 +1,22 @@
 <template>
   <NotificationProvider />
-  <div id="app" class="h-screen flex overflow-hidden">
+  <div id="app" class="flex overflow-hidden h-screen">
     
     <!-- SIDEBAR CONDICIONAL POR ROL -->
     <div class="w-72" v-if="auth.isAuthenticated">
       <NavBarAdmin v-if="auth.user?.role === 'ADMIN'" />
+      <AdminSidebar v-if="auth.user?.role === 'RESTAURANT_OWNER'" />
       <NavBarUser v-else />
     </div>
     
     <!-- CONTENIDO DINÁMICO -->
-    <div class="flex-1 overflow-y-auto bg-gray-50">
+    <div class="overflow-y-auto flex-1 bg-gray-50">
       <router-view />
     </div>
     
     <!-- CARRITO (solo para clientes) -->
     <CarritoSidebar
-      v-if="auth.isAuthenticated && auth.user?.role !== 'ADMIN'"
+      v-if="auth.isAuthenticated && auth.user?.role === 'USER'"
       @realizar-pedido="procesarPedidoGlobal"
       class="absolute top-0 right-0 z-50"
     />
@@ -28,6 +29,7 @@ import { useAuthStore } from "@/stores/auth";
 import CarritoSidebar from '@/components/cliente/Carrito.vue';
 import NavBarUser from '@/components/cliente/NavBarUser.vue';
 import NavBarAdmin from '@/components/admin/NavBarAdmin.vue';
+import AdminSidebar from "./components/restaurante/AdiminSidebar.vue";
 import NotificationProvider from "@/components/NotificationProvider.vue";
 
 export default {
@@ -36,7 +38,8 @@ export default {
     CarritoSidebar,
     NavBarUser,
     NavBarAdmin,
-    NotificationProvider, 
+    NotificationProvider,
+    AdminSidebar, 
   },
   setup() {
     const auth = useAuthStore();

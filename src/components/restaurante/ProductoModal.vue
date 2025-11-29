@@ -1,76 +1,142 @@
 <template>
-  <div class="modal-overlay" @click="cerrar">
-    <div class="modal-card" @click.stop>
-      <div class="modal-header">
-        <h2>{{ producto?.id ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
-        <button @click="cerrar" class="btn-close">×</button>
+  <div
+    class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+    @click="cerrar"
+  >
+    <div
+      class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto"
+      @click.stop
+    >
+      <!-- Header -->
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-gray-800">
+            {{ producto?.id ? 'Editar Producto' : 'Nuevo Producto' }}
+          </h2>
+          <button
+            @click="cerrar"
+            class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 transition flex items-center justify-center"
+          >
+            <i class="fas fa-times text-gray-600"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- Mensaje de error -->
-      <div v-if="error" class="error-message">
-        <i class="fas fa-exclamation-circle"></i>
-        {{ error }}
+      <!-- Error -->
+      <div v-if="error" class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+        <i class="text-red-600 fas fa-exclamation-circle"></i>
+        <span class="text-red-700 font-medium">{{ error }}</span>
       </div>
 
-      <form @submit.prevent="guardar" class="modal-form">
-        <div class="form-grid">
-          <div class="input-group">
-            <input type="text" v-model="form.nombre" required placeholder=" " />
-            <label>Nombre del producto *</label>
+      <!-- Formulario -->
+      <form @submit.prevent="guardar" class="p-6 space-y-6">
+        <!-- Grid de campos principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del producto *</label>
+            <input
+              type="text"
+              v-model="form.nombre"
+              required
+              class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition text-base"
+              placeholder="Ej: Hamburguesa Clásica"
+            />
           </div>
 
-          <div class="input-group">
-            <input type="number" step="0.01" v-model.number="form.precio" required placeholder=" " />
-            <label>Precio (Bs.) *</label>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Precio (Bs.) *</label>
+            <input
+              type="number"
+              step="0.01"
+              v-model.number="form.precio"
+              required
+              class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition text-base"
+              placeholder="0.00"
+            />
           </div>
 
-          <div class="input-group">
-            <select v-model="form.categoria_id" required>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Categoría *</label>
+            <select
+              v-model="form.categoria_id"
+              required
+              class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition font-medium"
+            >
               <option :value="null" disabled>Selecciona una categoría</option>
               <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
                 {{ cat.nombre }}
               </option>
             </select>
-            <label>Categoría *</label>
           </div>
 
-          <div class="input-group checkbox">
-            <label>
-              <input type="checkbox" v-model="form.disponible" />
-              <span>Producto disponible</span>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="form.disponible"
+                class="w-6 h-6 text-gray-900 rounded-lg focus:ring-gray-900"
+              />
+              <span class="font-medium text-gray-700">Producto disponible</span>
             </label>
           </div>
         </div>
 
-        <div class="input-group textarea">
-          <textarea v-model="form.descripcion" rows="4" placeholder=" "></textarea>
-          <label>Descripción (opcional)</label>
+        <!-- Descripción -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Descripción (opcional)</label>
+          <textarea
+            v-model="form.descripcion"
+            rows="4"
+            class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition resize-none"
+            placeholder="Ingredientes, preparación, notas especiales..."
+          ></textarea>
         </div>
 
-        <div class="input-group file">
-          <label>Imagen del producto</label>
-          <input type="file" accept="image/*" @change="onFileChange" />
-          <div v-if="previewUrl" class="image-preview">
-            <img :src="previewUrl" alt="Vista previa" />
-            <small>Vista previa de la nueva imagen</small>
-          </div>
-          <div v-else-if="producto?.imagen" class="image-preview">
-            <img :src="getImagenUrl(producto.imagen)" alt="Actual" />
-            <small>Imagen actual</small>
-          </div>
-          <div v-else class="image-preview">
-            <div class="no-image">
-              <i class="fas fa-image"></i>
-              <small>No hay imagen seleccionada</small>
+        <!-- Imagen -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-3">Imagen del producto</label>
+          <input
+            type="file"
+            accept="image/*"
+            @change="onFileChange"
+            class="block w-full text-sm text-gray-600 file:mr-4 file:py-3 file:px-5 file:rounded-xl file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition"
+          />
+
+          <!-- Vista previa -->
+          <div class="mt-4 text-center">
+            <div v-if="previewUrl || producto?.imagen" class="inline-block">
+              <img
+                :src="previewUrl || getImagenUrl(producto.imagen)"
+                class="max-h-64 rounded-xl shadow-lg"
+                alt="Vista previa"
+              />
+              <p class="text-sm text-gray-500 mt-3">
+                {{ previewUrl ? 'Nueva imagen seleccionada' : 'Imagen actual' }}
+              </p>
+            </div>
+            <div v-else class="py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+              <i class="text-5xl text-gray-400 fas fa-image mb-3"></i>
+              <p class="text-gray-500">No hay imagen seleccionada</p>
             </div>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" @click="cerrar" class="btn-cancel">Cancelar</button>
-          <button type="submit" class="btn-submit" :disabled="guardando">
+        <!-- Botones -->
+        <div class="flex gap-4 pt-6 border-t border-gray-100">
+          <button
+            type="button"
+            @click="cerrar"
+            class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            :disabled="guardando"
+            class="flex-1 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-md"
+          >
             <i v-if="guardando" class="fas fa-spinner fa-spin"></i>
-            {{ guardando ? 'Guardando...' : (producto?.id ? 'Actualizar Producto' : 'Guardar Producto') }}
+            {{ guardando ? 'Guardando...' : (producto?.id ? 'Actualizar Producto' : 'Crear Producto') }}
           </button>
         </div>
       </form>

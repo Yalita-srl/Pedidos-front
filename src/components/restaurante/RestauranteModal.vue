@@ -1,195 +1,165 @@
 <template>
   <!-- Modal Overlay -->
   <transition name="modal-fade">
-    <div v-if="modelValue" class="modal-overlay" @click.self="cerrar">
-      <div class="modal-container" @click.stop>
-        <!-- Header del Modal -->
-        <div class="modal-header">
-          <div class="header-content">
-            <h2>
-              <i :class="esEdicion ? 'fas fa-edit' : 'fas fa-plus-circle'"></i>
-              {{ esEdicion ? 'Editar Restaurante' : 'Nuevo Restaurante' }}
-            </h2>
-            <p class="subtitle">
-              {{ esEdicion ? 'Actualiza la información de tu restaurante' : 'Completa los datos para registrar tu restaurante' }}
-            </p>
+    <div v-if="modelValue" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" @click.self="cerrar">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto" @click.stop>
+        
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-100">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <i :class="esEdicion ? 'fas fa-edit text-indigo-600' : 'fas fa-plus-circle text-indigo-600'" class="text-2xl"></i>
+              <div>
+                <h2 class="text-2xl font-bold text-gray-800">
+                  {{ esEdicion ? 'Editar Restaurante' : 'Nuevo Restaurante' }}
+                </h2>
+                <p class="text-gray-500 text-sm mt-1">
+                  {{ esEdicion ? 'Actualiza la información de tu restaurante' : 'Completa los datos para registrar tu restaurante' }}
+                </p>
+              </div>
+            </div>
+            <button @click="cerrar" class="w-11 h-11 rounded-xl bg-gray-100 hover:bg-gray-200 transition flex items-center justify-center">
+              <i class="fas fa-times text-gray-20 text-gray-600"></i>
+            </button>
           </div>
-          <button @click="cerrar" class="btn-close" type="button">
-            <i class="fas fa-times"></i>
-          </button>
         </div>
 
-        <!-- Contenido del Modal -->
-        <div class="modal-body">
-          <form @submit.prevent="guardarRestaurante" id="restaurante-form">
-            
-            <!-- Sección de Imagen -->
-            <div class="form-section">
-              <h3 class="section-title">
-                <i class="fas fa-image"></i>
-                Imagen del Restaurante
-              </h3>
-              
-              <div class="image-upload-container">
-                <!-- Preview de la imagen -->
-                <div class="image-preview" :class="{ 'has-image': imagenPreview || restauranteData?.imagen_url }">
-                  <div v-if="imagenPreview || restauranteData?.imagen_url" class="preview-content">
-                    <img 
-                      :src="imagenPreview || restauranteData?.imagen_url" 
-                      alt="Preview"
-                      class="preview-image"
-                    />
-                    <button 
-                      type="button" 
-                      @click="eliminarImagen" 
-                      class="btn-remove-image"
-                      title="Eliminar imagen"
-                    >
+        <!-- Mensaje de error general -->
+        <div v-if="error" class="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3">
+          <i class="text-red-600 fas fa-exclamation-circle"></i>
+          <span class="text-red-700 font-medium">{{ error }}</span>
+        </div>
+
+        <!-- Formulario -->
+        <form @submit.prevent="guardarRestaurante" class="p-6 space-y-8">
+          
+          <!-- Sección Imagen -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Imagen del restaurante</label>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <!-- Preview -->
+              <div class="flex flex-col items-center">
+                <div class="w-full h-80 rounded-xl border-2 border-dashed border-gray-300 overflow-hidden bg-gray-50 flex items-center justify-center relative"
+                     :class="{ 'border-indigo-600 border-solid': imagenPreview || restauranteData?.imagen_url }">
+                  <div v-if="imagenPreview || restauranteData?.imagen_url" class="relative w-full h-full">
+                    <img :src="imagenPreview || restauranteData?.imagen_url" class="w-full h-full object-cover" alt="Preview" />
+                    <button type="button" @click="eliminarImagen"
+                            class="absolute top-3 right-3 w-10 h-10 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center justify-center shadow-lg transition">
                       <i class="fas fa-trash"></i>
                     </button>
                   </div>
-                  <div v-else class="preview-placeholder">
-                    <i class="fas fa-image"></i>
-                    <p>Vista previa de la imagen</p>
-                    <small>Sube una imagen para tu restaurante</small>
+                  <div v-else class="text-center text-gray-400">
+                    <i class="fas fa-image text-6xl mb-4"></i>
+                    <p class="font-medium">Vista previa de la imagen</p>
+                    <small>Sube una foto de tu restaurante</small>
                   </div>
                 </div>
+              </div>
 
-                <!-- Input de archivo -->
-                <div class="upload-controls">
-                  <input
-                    type="file"
-                    ref="imagenInput"
-                    @change="manejarCambioImagen"
-                    accept="image/*"
-                    class="file-input"
-                    id="imagen-upload"
-                  />
-                  <label for="imagen-upload" class="btn-upload">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    {{ imagenPreview || restauranteData?.imagen_url ? 'Cambiar imagen' : 'Seleccionar imagen' }}
-                  </label>
-                  <p class="upload-hint">
-                    <i class="fas fa-info-circle"></i>
-                    Formatos: JPG, PNG, GIF (Max: 5MB)
-                  </p>
-                </div>
+              <!-- Controles de subida -->
+              <div class="flex flex-col justify-center space-y-4">
+                <input
+                  type="file"
+                  ref="imagenInput"
+                  @change="manejarCambioImagen"
+                  accept="image/*"
+                  class="hidden"
+                  id="imagen-restaurante"
+                />
+                <label for="imagen-restaurante"
+                       class="cursor-pointer inline-flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold rounded-xl hover:from-indigo-700 hover:to-indigo-800 transition shadow-lg">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  {{ imagenPreview || restauranteData?.imagen_url ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+                </label>
+                <p class="text-sm text-gray-600 flex items-center gap-2">
+                  <i class="fas fa-info-circle text-indigo-600"></i>
+                  Formatos: JPG, PNG, GIF · Máximo 5 MB
+                </p>
               </div>
             </div>
+          </div>
 
-            <!-- Información Básica -->
-            <div class="form-section">
-              <h3 class="section-title">
-                <i class="fas fa-info-circle"></i>
-                Información Básica
-              </h3>
-              
-              <div class="form-grid">
-                <!-- Nombre -->
-                <div class="form-group full-width">
-                  <label for="nombre">
-                    <i class="fas fa-store"></i>
-                    Nombre del Restaurante *
-                  </label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    v-model="formData.nombre"
-                    required
-                    placeholder="Ej: La Casona del Chef"
-                    :class="{ 'error': errores.nombre }"
-                  />
-                  <span v-if="errores.nombre" class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> {{ errores.nombre }}
-                  </span>
-                </div>
+          <!-- Información Básica -->
+          <div>
+            <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <i class="fas fa-info-circle text-indigo-600"></i>
+              Información Básica
+            </h3>
 
-                <!-- Dirección -->
-                <div class="form-group full-width">
-                  <label for="direccion">
-                    <i class="fas fa-map-marker-alt"></i>
-                    Dirección *
-                  </label>
-                  <input
-                    type="text"
-                    id="direccion"
-                    v-model="formData.direccion"
-                    required
-                    placeholder="Ej: Av. Principal #123, Centro"
-                    :class="{ 'error': errores.direccion }"
-                  />
-                  <span v-if="errores.direccion" class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> {{ errores.direccion }}
-                  </span>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Nombre -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del Restaurante *</label>
+                <input
+                  type="text"
+                  v-model="formData.nombre"
+                  required
+                  placeholder="Ej: La Casona del Chef"
+                  class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition text-base"
+                />
+              </div>
 
-                <!-- Teléfono -->
-                <div class="form-group">
-                  <label for="telefono">
-                    <i class="fas fa-phone"></i>
-                    Teléfono *
-                  </label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    v-model="formData.telefono"
-                    required
-                    placeholder="Ej: +591 12345678"
-                    :class="{ 'error': errores.telefono }"
-                  />
-                  <span v-if="errores.telefono" class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> {{ errores.telefono }}
-                  </span>
-                </div>
+              <!-- Dirección -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                <input
+                  type="text"
+                  v-model="formData.direccion"
+                  required
+                  placeholder="Ej: Av. Principal #123, Centro"
+                  class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition text-base"
+                />
+              </div>
 
-                <!-- Estado -->
-                <div class="form-group">
-                  <label for="estado">
-                    <i class="fas fa-toggle-on"></i>
-                    Estado *
-                  </label>
-                  <select
-                    id="estado"
-                    v-model="formData.estado"
-                    required
-                    :class="{ 'error': errores.estado }"
-                  >
-                    <option value="">Selecciona un estado</option>
-                    <option value="Abierto">🟢 Abierto</option>
-                    <option value="Cerrado">🔴 Cerrado</option>
-                    <option value="En mantenimiento">🟡 En mantenimiento</option>
-                  </select>
-                  <span v-if="errores.estado" class="error-message">
-                    <i class="fas fa-exclamation-circle"></i> {{ errores.estado }}
-                  </span>
-                </div>
+              <!-- Teléfono -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                <input
+                  type="tel"
+                  v-model="formData.telefono"
+                  required
+                  placeholder="Ej: +591 70001234"
+                  class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition text-base"
+                />
+              </div>
+
+              <!-- Estado -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Estado *</label>
+                <select
+                  v-model="formData.estado"
+                  required
+                  class="w-full px-5 py-4 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition font-medium"
+                >
+                  <option value="" disabled>Selecciona un estado</option>
+                  <option value="Abierto">Abierto</option>
+                  <option value="Cerrado">Cerrado</option>
+                  <option value="En mantenimiento">En mantenimiento</option>
+                </select>
               </div>
             </div>
+          </div>
 
-          </form>
-        </div>
-
-        <!-- Footer del Modal -->
-        <div class="modal-footer">
-          <button 
-            type="button" 
-            @click="cerrar" 
-            class="btn-secondary"
-            :disabled="guardando"
-          >
-            <i class="fas fa-times"></i> Cancelar
-          </button>
-          <button 
-            type="submit"
-            form="restaurante-form"
-            class="btn-primary"
-            :disabled="guardando"
-          >
-            <i v-if="guardando" class="fas fa-spinner fa-spin"></i>
-            <i v-else class="fas fa-save"></i>
-            {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Crear Restaurante') }}
-          </button>
-        </div>
+          <!-- Botones -->
+          <div class="flex gap-4 pt-6 border-t border-gray-100">
+            <button
+              type="button"
+              @click="cerrar"
+              class="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="guardando"
+              class="flex-1 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-md"
+            >
+              <i v-if="guardando" class="fas fa-spinner fa-spin"></i>
+              {{ guardando ? 'Guardando...' : (esEdicion ? 'Actualizar' : 'Crear Restaurante') }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </transition>
@@ -197,41 +167,24 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
+import { useAuthStore } from '@/stores/auth'
 
-// Props
 const props = defineProps({
-  modelValue: {
-    type: Boolean,
-    required: true
-  },
-  restauranteData: {
-    type: Object,
-    default: null
-  }
+  modelValue: { type: Boolean, required: true },
+  restauranteData: { type: Object, default: null }
 })
 
-// Emits
 const emit = defineEmits(['update:modelValue', 'guardar'])
 
-// Store de autenticación
 const authStore = useAuthStore()
-
-// Computed
 const esEdicion = computed(() => !!props.restauranteData)
 
-// Obtener el ID del usuario autenticado
-const usuarioAdminId = computed(() => {
-  return authStore.user?.id || null
-})
-
-// Estados
 const guardando = ref(false)
+const error = ref('')
 const imagenInput = ref(null)
 const imagenPreview = ref('')
 const imagenArchivo = ref(null)
 
-// Datos del formulario
 const formData = reactive({
   nombre: '',
   direccion: '',
@@ -239,589 +192,103 @@ const formData = reactive({
   estado: 'Abierto'
 })
 
-// Errores
-const errores = reactive({
-  nombre: '',
-  direccion: '',
-  telefono: '',
-  estado: ''
-})
-
-// Watch para cargar datos en edición
 watch(() => props.restauranteData, (newData) => {
   if (newData) {
-    Object.assign(formData, {
-      nombre: newData.nombre || '',
-      direccion: newData.direccion || '',
-      telefono: newData.telefono || '',
-      estado: newData.estado || 'Abierto'
-    })
+    formData.nombre = newData.nombre || ''
+    formData.direccion = newData.direccion || ''
+    formData.telefono = newData.telefono || ''
+    formData.estado = newData.estado || 'Abierto'
+    imagenPreview.value = ''
+    imagenArchivo.value = null
+  } else {
+    Object.assign(formData, { nombre: '', direccion: '', telefono: '', estado: 'Abierto' })
     imagenPreview.value = ''
     imagenArchivo.value = null
   }
 }, { immediate: true })
 
-// Métodos
 const cerrar = () => {
   if (!guardando.value) {
     emit('update:modelValue', false)
-    resetearFormulario()
   }
 }
 
-const resetearFormulario = () => {
-  Object.assign(formData, {
-    nombre: '',
-    direccion: '',
-    telefono: '',
-    estado: 'Abierto'
-  })
-  Object.keys(errores).forEach(key => errores[key] = '')
-  imagenPreview.value = ''
-  imagenArchivo.value = null
-}
-
-const validarFormulario = () => {
-  let valido = true
-  Object.keys(errores).forEach(key => errores[key] = '')
-
-  if (!formData.nombre.trim()) {
-    errores.nombre = 'El nombre es requerido'
-    valido = false
-  }
-
-  if (!formData.direccion.trim()) {
-    errores.direccion = 'La dirección es requerida'
-    valido = false
-  }
-
-  if (!formData.telefono.trim()) {
-    errores.telefono = 'El teléfono es requerido'
-    valido = false
-  } else if (!/^[+\d\s()-]+$/.test(formData.telefono)) {
-    errores.telefono = 'Formato de teléfono inválido'
-    valido = false
-  }
-
-  if (!formData.estado) {
-    errores.estado = 'El estado es requerido'
-    valido = false
-  }
-
-  return valido
-}
-
-const manejarCambioImagen = (event) => {
-  const file = event.target.files[0]
+const manejarCambioImagen = (e) => {
+  const file = e.target.files[0]
   if (!file) return
 
-  // Validar tipo de archivo
   if (!file.type.startsWith('image/')) {
-    alert('Por favor selecciona un archivo de imagen válido')
+    error.value = 'Solo se permiten imágenes'
     return
   }
-
-  // Validar tamaño (5MB)
   if (file.size > 5 * 1024 * 1024) {
-    alert('La imagen no debe superar los 5MB')
+    error.value = 'La imagen no debe superar los 5 MB'
     return
   }
 
   imagenArchivo.value = file
-
-  // Crear preview
   const reader = new FileReader()
-  reader.onload = (e) => {
-    imagenPreview.value = e.target.result
-  }
+  reader.onload = (ev) => { imagenPreview.value = ev.target.result }
   reader.readAsDataURL(file)
+  error.value = ''
 }
 
 const eliminarImagen = () => {
   imagenPreview.value = ''
   imagenArchivo.value = null
-  if (imagenInput.value) {
-    imagenInput.value.value = ''
-  }
+  if (imagenInput.value) imagenInput.value.value = ''
 }
 
 const guardarRestaurante = async () => {
-  if (!validarFormulario()) return;
+  error.value = ''
 
-  // Verificar que tenemos un usuario autenticado
-  if (!usuarioAdminId.value) {
-    alert('Error: No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.')
-    return
-  }
+  if (!formData.nombre.trim()) return error.value = 'El nombre es obligatorio'
+  if (!formData.direccion.trim()) return error.value = 'La dirección es obligatoria'
+  if (!formData.telefono.trim()) return error.value = 'El teléfono es obligatorio'
+  if (!formData.estado) return error.value = 'Selecciona un estado'
 
-  guardando.value = true;
+  guardando.value = true
 
   try {
-    // 1. Crear objeto FormData
-    const formDataObj = new FormData();
-    
-    // 2. Agregar campos del formulario
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataObj.append(key, value);
-    });
+    const formDataObj = new FormData()
+    formDataObj.append('nombre', formData.nombre.trim())
+    formDataObj.append('direccion', formData.direccion.trim())
+    formDataObj.append('telefono', formData.telefono.trim())
+    formDataObj.append('estado', formData.estado)
+    formDataObj.append('usuario_admin_id', authStore.user.id)
 
-    // 3. Agregar imagen si existe
     if (imagenArchivo.value) {
-      formDataObj.append('imagen', imagenArchivo.value);
+      formDataObj.append('imagen', imagenArchivo.value)
     }
 
-    // 4. Agregar usuario_admin_id del usuario autenticado
-    console.log('👤 Usando ID de usuario autenticado:', usuarioAdminId.value)
-    formDataObj.append('usuario_admin_id', usuarioAdminId.value);
-
-    // 5. Si es edición, agregar _method=PUT
     if (esEdicion.value) {
-      formDataObj.append('_method', 'PUT');
+      formDataObj.append('_method', 'PUT')
     }
 
-    // 6. Emitir los datos del formulario
     emit('guardar', {
       formData: formDataObj,
       id: esEdicion.value ? props.restauranteData.id : null
-    });
-    
-    // Cerrar el modal después de un breve retraso
-    setTimeout(() => {
-      guardando.value = false;
-      cerrar();
-    }, 500);
+    })
 
-  } catch (error) {
-    console.error('❌ Error al guardar:', error);
-    guardando.value = false;
+    setTimeout(() => {
+      guardando.value = false
+      cerrar()
+    }, 600)
+  } catch (err) {
+    error.value = 'Error al guardar el restaurante'
+    console.error(err)
+    guardando.value = false
   }
-};
+}
 </script>
 
 <style scoped>
-/* Modal Overlay */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-/* Modal Container */
-.modal-container {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Modal Header */
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 24px 32px;
-  border-bottom: 2px solid #e5e7eb;
-  gap: 16px;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.header-content h2 {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.header-content h2 i {
-  color: #4f46e5;
-}
-
-.subtitle {
-  margin: 0;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.btn-close {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #f3f4f6;
-  color: #6b7280;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  flex-shrink: 0;
-}
-
-.btn-close:hover {
-  background: #e5e7eb;
-  color: #1f2937;
-  transform: scale(1.05);
-}
-
-/* Modal Body */
-.modal-body {
-  padding: 32px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-/* Form Sections */
-.form-section {
-  margin-bottom: 32px;
-}
-
-.form-section:last-child {
-  margin-bottom: 0;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 20px 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.section-title i {
-  color: #4f46e5;
-}
-
-/* Image Upload */
-.image-upload-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.image-preview {
-  width: 100%;
-  height: 240px;
-  border: 3px dashed #d1d5db;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.3s;
-  background: #f9fafb;
-}
-
-.image-preview.has-image {
-  border-style: solid;
-  border-color: #4f46e5;
-}
-
-.preview-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remove-image {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  background: rgba(239, 68, 68, 0.95);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  backdrop-filter: blur(4px);
-}
-
-.btn-remove-image:hover {
-  background: #dc2626;
-  transform: scale(1.1);
-}
-
-.preview-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #9ca3af;
-  text-align: center;
-  padding: 20px;
-}
-
-.preview-placeholder i {
-  font-size: 48px;
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
-
-.preview-placeholder p {
-  margin: 4px 0;
-  font-weight: 600;
-  color: #6b7280;
-}
-
-.preview-placeholder small {
-  color: #9ca3af;
-  font-size: 12px;
-}
-
-.upload-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.file-input {
-  display: none;
-}
-
-.btn-upload {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
-  color: white;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-}
-
-.btn-upload:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
-}
-
-.upload-hint {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 8px;
-}
-
-.upload-hint i {
-  color: #4f46e5;
-}
-
-/* Form Grid */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Form Groups */
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #374151;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.form-group label i {
-  color: #4f46e5;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group select {
-  padding: 12px 16px;
-  border: 2px solid #e5e7eb;
-  border-radius: 10px;
-  font-size: 15px;
-  color: #1f2937;
-  background: white;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-}
-
-.form-group input.error,
-.form-group select.error {
-  border-color: #ef4444;
-  background: #fef2f2;
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 13px;
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Modal Footer */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 20px 32px;
-  border-top: 2px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 0 0 20px 20px;
-}
-
-/* Buttons */
-.btn-primary,
-.btn-secondary {
-  padding: 12px 24px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: none;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: white;
-  color: #6b7280;
-  border: 2px solid #e5e7eb;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #f9fafb;
-  color: #374151;
-  border-color: #d1d5db;
-}
-
-/* Transitions */
 .modal-fade-enter-active,
 .modal-fade-leave-active {
   transition: opacity 0.3s ease;
 }
-
 .modal-fade-enter-from,
 .modal-fade-leave-to {
   opacity: 0;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .modal-container {
-    max-height: 95vh;
-    border-radius: 20px 20px 0 0;
-    margin-top: auto;
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding: 20px;
-  }
-
-  .header-content h2 {
-    font-size: 20px;
-  }
-
-  .image-upload-container {
-    grid-template-columns: 1fr;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-footer {
-    flex-direction: column-reverse;
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    justify-content: center;
-  }
 }
 </style>

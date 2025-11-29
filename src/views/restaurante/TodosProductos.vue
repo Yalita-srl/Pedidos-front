@@ -1,280 +1,230 @@
 <template>
-  <div class="flex min-h-screen bg-slate-50">
-    <!-- Sidebar -->
-    <AdminSidebar />
+  <div class="flex-1 ml-64 transition-all duration-300 lg:ml-0">
+    <div class="p-4 mx-auto max-w-7xl sm:p-6">
 
-    <!-- Contenido principal -->
-    <div class="flex-1 ml-72 transition-all duration-300 max-sm:ml-0">
-      <div class="p-6 pt-8 mx-auto max-w-7xl">
+      <!-- Header -->
+      <div class="flex flex-col gap-6 mb-8 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">Todos los Productos</h1>
+          <p class="mt-2 text-gray-600">Vista global de todos los productos de tus restaurantes</p>
+        </div>
 
-        <!-- Header -->
-        <div class="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-800">Todos los Productos</h1>
-            <p class="mt-2 text-gray-600">Vista global de todos los productos de tus restaurantes</p>
+        <!-- Buscador + Filtro disponibilidad (mejorado pero igual funcionalidad) -->
+        <div class="flex flex-col gap-4 sm:flex-row">
+          <div class="relative">
+            <input
+              v-model="terminoBusqueda"
+              type="text"
+              placeholder="Buscar productos..."
+              class="w-full sm:w-80 pl-12 pr-6 py-4 rounded-2xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition shadow-sm text-base"
+            />
+            <i class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 fas fa-search text-lg"></i>
           </div>
-          
-          <div class="flex gap-3">
-            <!-- Filtro por disponibilidad -->
-            <select v-model="filtroDisponible" 
-                    class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option value="todos">Todos los productos</option>
-              <option value="disponible">Solo disponibles</option>
-              <option value="no-disponible">No disponibles</option>
-            </select>
 
-            <!-- Buscador -->
-            <div class="relative">
-              <input type="text" 
-                     v-model="terminoBusqueda"
-                     placeholder="Buscar productos..."
-                     class="py-2 pr-4 pl-10 w-64 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <i class="absolute left-3 top-1/2 text-gray-400 transform -translate-y-1/2 fas fa-search"></i>
-            </div>
+          <select
+            v-model="filtroDisponible"
+            class="px-6 py-4 rounded-2xl border border-gray-200 font-medium focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition shadow-sm text-base"
+          >
+            <option value="todos">Todos los estados</option>
+            <option value="disponible">Disponibles</option>
+            <option value="no-disponible">No disponibles</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading / Error -->
+      <div v-if="loading" class="py-20 text-center">
+        <i class="text-5xl text-gray-900 fas fa-spinner fa-spin mb-4"></i>
+        <p class="text-lg text-gray-600">Cargando productos...</p>
+      </div>
+
+      <div v-else-if="error" class="text-center py-16">
+        <i class="text-6xl text-red-500 fas fa-exclamation-triangle mb-4"></i>
+        <p class="text-lg text-gray-700 mb-4">{{ error }}</p>
+        <button @click="cargarRestaurantes"
+                class="px-8 py-4 font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition">
+          Reintentar
+        </button>
+      </div>
+
+      <div v-else>
+        <!-- Estadísticas rápidas (mejoradas) -->
+        <div class="grid grid-cols-2 gap-5 mb-10 md:grid-cols-4">
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center">
+            <p class="text-sm text-gray-600 font-medium">Total Productos</p>
+            <p class="text-3xl font-extrabold text-gray-900 mt-2">{{ totalProductos }}</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center">
+            <p class="text-sm text-gray-600 font-medium">Disponibles</p>
+            <p class="text-3xl font-extrabold text-emerald-600 mt-2">{{ productosDisponibles }}</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center">
+            <p class="text-sm text-gray-600 font-medium">No disponibles</p>
+            <p class="text-3xl font-extrabold text-red-600 mt-2">{{ productosNoDisponibles }}</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center">
+            <p class="text-sm text-gray-600 font-medium">Restaurantes</p>
+            <p class="text-3xl font-extrabold text-purple-600 mt-2">{{ restaurantesConProductos }}</p>
           </div>
         </div>
 
-        <!-- Loading / Error -->
-        <div v-if="loading" class="py-12 text-center">
-          <i class="text-4xl text-blue-600 fas fa-spinner fa-spin"></i>
-          <p class="mt-4 text-gray-600">Cargando productos...</p>
-        </div>
+        <!-- Filtros avanzados (tus selects originales, solo más bonitos) -->
+        <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+          <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <h3 class="text-xl font-bold text-gray-800">Filtros avanzados</h3>
 
-        <div v-else-if="error" class="p-6 text-center text-red-700 bg-red-50 rounded-xl border border-red-200">
-          <i class="text-2xl fas fa-exclamation-triangle"></i>
-          <p class="mt-2">{{ error }}</p>
-          <button @click="cargarRestaurantes" class="px-6 py-2 mt-4 text-white bg-red-600 rounded-lg hover:bg-red-700">
-            Reintentar
-          </button>
-        </div>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <select v-model="filtroRestaurante"
+                      class="px-5 py-3.5 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition font-medium">
+                <option value="todos">Todos los restaurantes</option>
+                <option v-for="rest in restaurantes" :key="rest.id" :value="rest.id">
+                  {{ rest.nombre }}
+                </option>
+              </select>
 
-        <!-- Contenido principal -->
-        <div v-else>
-          <!-- Estadísticas rápidas -->
-          <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-5">
-            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Total Productos</p>
-                  <p class="mt-1 text-2xl font-bold text-gray-900">{{ totalProductos }}</p>
-                </div>
-                <div class="p-3 bg-blue-100 rounded-xl">
-                  <i class="text-xl text-blue-600 fas fa-utensils"></i>
-                </div>
-              </div>
-            </div>
+              <select v-model="filtroCategoria"
+                      class="px-5 py-3.5 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition font-medium">
+                <option value="todas">Todas las categorías</option>
+                <option v-for="cat in categoriasUnicas" :key="cat.id" :value="cat.id">
+                  {{ cat.nombre }}
+                </option>
+              </select>
 
-            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Disponibles</p>
-                  <p class="mt-1 text-2xl font-bold text-green-600">{{ productosDisponibles }}</p>
-                </div>
-                <div class="p-3 bg-green-100 rounded-xl">
-                  <i class="text-xl text-green-600 fas fa-check-circle"></i>
-                </div>
-              </div>
-            </div>
+              <select v-model="filtroPrecio"
+                      class="px-5 py-3.5 rounded-xl border border-gray-200 focus:border-gray-900 focus:ring-4 focus:ring-gray-900/10 transition font-medium">
+                <option value="todos">Todos los precios</option>
+                <option value="0-10">Bs. 0 - 10</option>
+                <option value="10-25">Bs. 10 - 25</option>
+                <option value="25-50">Bs. 25 - 50</option>
+                <option value="50+">Bs. 50+</option>
+              </select>
 
-            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">No Disponibles</p>
-                  <p class="mt-1 text-2xl font-bold text-red-600">{{ productosNoDisponibles }}</p>
-                </div>
-                <div class="p-3 bg-red-100 rounded-xl">
-                  <i class="text-xl text-red-600 fas fa-times-circle"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Restaurantes</p>
-                  <p class="mt-1 text-2xl font-bold text-gray-900">{{ restaurantesConProductos }}</p>
-                </div>
-                <div class="p-3 bg-purple-100 rounded-xl">
-                  <i class="text-xl text-purple-600 fas fa-store"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div class="flex justify-between items-center">
-                <div>
-                  <p class="text-sm font-medium text-gray-600">Valor Total</p>
-                  <p class="mt-1 text-2xl font-bold text-amber-600">Bs. {{ valorTotalInventario }}</p>
-                </div>
-                <div class="p-3 bg-amber-100 rounded-xl">
-                  <i class="text-xl text-amber-600 fas fa-dollar-sign"></i>
-                </div>
-              </div>
+              <button @click="limpiarFiltros"
+                      class="px-6 py-3.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition">
+                Limpiar filtros
+              </button>
             </div>
           </div>
 
-          <!-- Filtros avanzados -->
-          <div class="p-6 mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm">
-            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <h3 class="text-lg font-semibold text-gray-800">Filtros Avanzados</h3>
-              
-              <div class="flex flex-wrap gap-4">
-                <!-- Filtro por restaurante -->
-                <select v-model="filtroRestaurante" 
-                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="todos">Todos los restaurantes</option>
-                  <option v-for="rest in restaurantes" :key="rest.id" :value="rest.id">
-                    {{ rest.nombre }}
-                  </option>
-                </select>
+          <!-- Chips de filtros activos -->
+          <div v-if="filtrosActivos" class="flex flex-wrap gap-3 mt-5">
+            <span class="px-4 py-2 bg-gray-900 text-white rounded-full text-sm font-medium">
+              {{ productosFiltrados.length }} encontrados
+            </span>
+            <span v-if="filtroRestaurante !== 'todos'" class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              {{ nombreRestauranteFiltro }}
+            </span>
+            <span v-if="filtroCategoria !== 'todas'" class="px-4 py-2 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">
+              {{ nombreCategoriaFiltro }}
+            </span>
+            <span v-if="filtroDisponible !== 'todos'" class="px-4 py-2 bg-amber-100 text-amber-800 rounded-full text-sm font-medium">
+              {{ filtroDisponible === 'disponible' ? 'Disponibles' : 'No disponibles' }}
+            </span>
+          </div>
+        </div>
 
-                <!-- Filtro por categoría -->
-                <select v-model="filtroCategoria" 
-                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="todas">Todas las categorías</option>
-                  <option v-for="cat in categoriasUnicas" :key="cat.id" :value="cat.id">
-                    {{ cat.nombre }}
-                  </option>
-                </select>
+        <!-- Sin resultados -->
+        <div v-if="productosFiltrados.length === 0" class="text-center py-20">
+          <div class="w-32 h-32 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
+            <span class="text-6xl">Dish</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-800">No se encontraron productos</p>
+          <p class="text-gray-500 mt-2">Intenta ajustar los filtros</p>
+        </div>
 
-                <!-- Filtro por precio -->
-                <select v-model="filtroPrecio" 
-                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="todos">Todos los precios</option>
-                  <option value="0-10">Bs. 0 - 10</option>
-                  <option value="10-25">Bs. 10 - 25</option>
-                  <option value="25-50">Bs. 25 - 50</option>
-                  <option value="50+">Bs. 50+</option>
-                </select>
+        <!-- Grid de productos (ESTILO 100% IGUAL AL RESTO) -->
+        <div v-else class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div
+            v-for="producto in productosFiltrados"
+            :key="producto.id"
+            class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden relative border border-gray-100"
+            :class="{ 'opacity-60': !producto.disponible }"
+          >
+            <!-- Imagen -->
+            <div class="relative h-48 bg-gray-100 overflow-hidden">
+              <img
+                v-if="producto.imagen"
+                :src="getImagenUrl(producto.imagen)"
+                class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                @error="e => e.target.src = '/placeholder-food.jpg'"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center bg-gray-200">
+                <span class="text-5xl opacity-40">Dish</span>
+              </div>
 
-                <!-- Botón limpiar filtros -->
-                <button @click="limpiarFiltros" 
-                        class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg border border-gray-300 hover:bg-gray-200">
-                  <i class="fas fa-times"></i> Limpiar
+              <!-- Badge No disponible -->
+              <div v-if="!producto.disponible"
+                   class="absolute top-3 right-3 bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                No disponible
+              </div>
+
+              <!-- Badge Categoría -->
+              <div class="absolute top-3 left-3">
+                <span class="bg-gray-900/80 backdrop-blur text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                  {{ obtenerNombreCategoria(producto.categoria_id) }}
+                </span>
+              </div>
+
+              <!-- Precio -->
+              <div class="absolute bottom-3 right-3">
+                <span class="bg-gray-900 text-white px-4 py-2 rounded-full font-extrabold text-lg shadow-lg">
+                  Bs. {{ formatoPrecio(producto.precio) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Info + Acciones -->
+            <div class="p-5">
+              <h3 class="font-bold text-gray-800 text-lg line-clamp-2">
+                {{ producto.nombre }}
+              </h3>
+
+              <p class="text-gray-500 text-sm mt-2 line-clamp-2">
+                {{ producto.descripcion || 'Sin descripción' }}
+              </p>
+
+              <!-- Restaurante pequeño -->
+              <div class="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100">
+                <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  <img v-if="obtenerRestaurante(producto.restaurante_id)?.imagen"
+                       :src="getImagenUrl(obtenerRestaurante(producto.restaurante_id)?.imagen)"
+                       class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                    <i class="fas fa-store"></i>
+                  </div>
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800 text-sm truncate">
+                    {{ obtenerNombreRestaurante(producto.restaurante_id) }}
+                  </p>
+                  <p class="text-xs text-gray-500 truncate">
+                    {{ obtenerDireccionRestaurante(producto.restaurante_id) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Botones Editar / Eliminar (negro y rojo como en el carrito) -->
+              <div class="mt-6 flex gap-3">
+                <button
+                  @click.stop="editarProducto(producto)"
+                  class="flex-1 py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition shadow-md"
+                >
+                  Editar
+                </button>
+                <button
+                  @click.stop="eliminarProducto(producto.id)"
+                  class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-md"
+                >
+                  Eliminar
                 </button>
               </div>
-            </div>
-
-            <!-- Info de filtros activos -->
-            <div v-if="filtrosActivos" class="flex flex-wrap gap-2 mt-4">
-              <span class="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
-                {{ productosFiltrados.length }} productos encontrados
-              </span>
-              <span v-if="filtroRestaurante !== 'todos'" class="px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">
-                Restaurante: {{ nombreRestauranteFiltro }}
-              </span>
-              <span v-if="filtroCategoria !== 'todas'" class="px-3 py-1 text-sm text-purple-800 bg-purple-100 rounded-full">
-                Categoría: {{ nombreCategoriaFiltro }}
-              </span>
-              <span v-if="filtroDisponible !== 'todos'" class="px-3 py-1 text-sm text-amber-800 bg-amber-100 rounded-full">
-                {{ filtroDisponible === 'disponible' ? 'Solo disponibles' : 'Solo no disponibles' }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Vista de productos -->
-          <div v-if="productosFiltrados.length === 0" class="py-16 text-center">
-            <i class="text-6xl text-gray-400 fas fa-utensils"></i>
-            <p class="mt-4 text-xl text-gray-600">No se encontraron productos</p>
-            <p class="text-gray-500">Intenta ajustar los filtros de búsqueda</p>
-            <button @click="limpiarFiltros" class="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
-              Limpiar filtros
-            </button>
-          </div>
-
-          <!-- Grid de productos -->
-          <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <div v-for="producto in productosFiltrados" :key="producto.id"
-                 class="overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-lg transition hover:shadow-2xl hover:-translate-y-2">
-              
-              <!-- Imagen del producto -->
-              <div class="overflow-hidden relative h-48 bg-gray-100">
-                <img v-if="producto.imagen"
-                     :src="getImagenUrl(producto.imagen)"
-                     @error="e => e.target.src = '/placeholder-food.jpg'"
-                     class="object-cover w-full h-full transition duration-300 hover:scale-105" />
-                <div v-else class="flex justify-center items-center h-full text-gray-400">
-                  <i class="text-5xl fas fa-image"></i>
-                </div>
-                
-                <!-- Badges -->
-                <div class="flex absolute top-3 left-3 flex-col gap-2">
-                  <span :class="producto.disponible ? 'bg-green-500' : 'bg-red-500'"
-                        class="px-2 py-1 text-xs font-medium text-white rounded-full">
-                    {{ producto.disponible ? 'Disponible' : 'No disponible' }}
-                  </span>
-                  <span class="px-2 py-1 text-xs font-medium text-white bg-blue-500 rounded-full">
-                    {{ obtenerNombreCategoria(producto.categoria_id) }}
-                  </span>
-                </div>
-
-                <!-- Precio -->
-                <div class="absolute top-3 right-3">
-                  <span class="px-3 py-2 text-lg font-bold text-white bg-black bg-opacity-70 rounded-full">
-                    Bs. {{ formatoPrecio(producto.precio) }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Información del producto -->
-              <div class="p-5">
-                <h3 class="text-lg font-bold text-gray-800 line-clamp-1">{{ producto.nombre }}</h3>
-                <p class="mt-2 text-sm text-gray-600 line-clamp-2">{{ producto.descripcion || 'Sin descripción' }}</p>
-                
-                <!-- Información del restaurante -->
-                <div class="flex gap-2 items-center p-3 mt-3 bg-gray-50 rounded-lg">
-                  <div class="overflow-hidden flex-shrink-0 w-8 h-8 rounded-full">
-                    <img v-if="obtenerRestaurante(producto.restaurante_id)?.imagen"
-                         :src="getImagenUrl(obtenerRestaurante(producto.restaurante_id)?.imagen)"
-                         class="object-cover w-full h-full" />
-                    <div v-else class="flex justify-center items-center w-full h-full bg-gray-200">
-                      <i class="text-xs text-gray-500 fas fa-store"></i>
-                    </div>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-800 truncate">
-                      {{ obtenerNombreRestaurante(producto.restaurante_id) }}
-                    </p>
-                    <p class="text-xs text-gray-500 truncate">
-                      {{ obtenerDireccionRestaurante(producto.restaurante_id) }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Acciones -->
-                <div class="flex gap-2 mt-4">
-                  <button @click="editarProducto(producto)"
-                          class="flex flex-1 gap-2 justify-center items-center py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg transition hover:bg-blue-200">
-                    <i class="fas fa-edit"></i> Editar
-                  </button>
-                  <button @click="verRestaurante(producto.restaurante_id)"
-                          class="flex flex-1 gap-2 justify-center items-center py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg transition hover:bg-gray-200">
-                    <i class="fas fa-external-link-alt"></i> Ver
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Paginación (opcional) -->
-          <div v-if="productosFiltrados.length > 12" class="flex justify-center mt-8">
-            <div class="flex gap-2">
-              <button class="px-4 py-2 text-gray-600 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
-                Anterior
-              </button>
-              <button class="px-4 py-2 text-white bg-blue-600 rounded-lg border border-blue-600">
-                1
-              </button>
-              <button class="px-4 py-2 text-gray-600 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
-                Siguiente
-              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal de edición de producto -->
+    <!-- Modal y mensaje (sin cambios) -->
     <ProductoModal
       v-if="mostrarModalProducto"
       :producto="productoSeleccionado"
@@ -284,10 +234,9 @@
       @guardado="handleProductoGuardado"
     />
 
-    <!-- Mensaje flotante -->
     <transition name="fade">
       <div v-if="mensaje"
-           class="flex fixed top-6 right-6 z-50 gap-3 items-center px-6 py-4 text-white bg-emerald-500 rounded-xl shadow-2xl">
+           class="fixed top-4 right-4 z-50 flex items-center gap-3 px-6 py-4 text-white bg-emerald-600 rounded-xl shadow-2xl">
         <i class="fas fa-check-circle"></i>
         {{ mensaje }}
       </div>
@@ -298,13 +247,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
-import AdminSidebar from '@/components/restaurante/AdiminSidebar.vue'
+import { useAuthStore } from '@/stores/auth'
 import ProductoModal from '@/components/restaurante/ProductoModal.vue'
 import { getRestaurantesPorUsuarioAdmin } from '@/services/catalogoService'
 
 const router = useRouter()
-const authStore = useAuthStore() // Usar el store de autenticación
+const authStore = useAuthStore()
 
 // Estado principal
 const restaurantes = ref([])
@@ -412,10 +360,7 @@ const productosNoDisponibles = computed(() => todosLosProductos.value.filter(p =
 const restaurantesConProductos = computed(() => 
   restaurantes.value.filter(rest => rest.productos.length > 0).length
 )
-const valorTotalInventario = computed(() => {
-  const total = todosLosProductos.value.reduce((sum, p) => sum + parseFloat(p.precio), 0)
-  return new Intl.NumberFormat('es-BO', { minimumFractionDigits: 2 }).format(total)
-})
+
 
 const filtrosActivos = computed(() => {
   return filtroRestaurante.value !== 'todos' || 
@@ -440,7 +385,6 @@ const nombreCategoriaFiltro = computed(() => {
 // Métodos
 const cargarRestaurantes = async () => {
   try {
-    // Verificar que tenemos un usuario autenticado
     if (!usuarioAdminId.value) {
       error.value = 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'
       loading.value = false
@@ -530,31 +474,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-}
-
-.line-clamp-2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.fade-enter-active, .fade-leave-active { 
-  transition: opacity 0.3s; 
-}
-.fade-enter-from, .fade-leave-to { 
-  opacity: 0; 
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .max-sm\:ml-0 {
-    margin-left: 0;
-  }
-}
+.fade-enter-active, .fade-leave-active { transition: opacity .3s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
