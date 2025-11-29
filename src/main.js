@@ -8,7 +8,7 @@ import App from './App.vue'
 import router from './router'
 import './index.css'
 
-console.log("🔥 App iniciando...");
+
 
 
 const pinia = createPinia()

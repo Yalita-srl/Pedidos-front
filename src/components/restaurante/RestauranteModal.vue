@@ -197,6 +197,7 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
+import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
 
 // Props
 const props = defineProps({
@@ -213,8 +214,16 @@ const props = defineProps({
 // Emits
 const emit = defineEmits(['update:modelValue', 'guardar'])
 
+// Store de autenticación
+const authStore = useAuthStore()
+
 // Computed
 const esEdicion = computed(() => !!props.restauranteData)
+
+// Obtener el ID del usuario autenticado
+const usuarioAdminId = computed(() => {
+  return authStore.user?.id || null
+})
 
 // Estados
 const guardando = ref(false)
@@ -339,6 +348,12 @@ const eliminarImagen = () => {
 const guardarRestaurante = async () => {
   if (!validarFormulario()) return;
 
+  // Verificar que tenemos un usuario autenticado
+  if (!usuarioAdminId.value) {
+    alert('Error: No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.')
+    return
+  }
+
   guardando.value = true;
 
   try {
@@ -355,9 +370,9 @@ const guardarRestaurante = async () => {
       formDataObj.append('imagen', imagenArchivo.value);
     }
 
-    // 4. Agregar usuario_admin_id (obtener del sistema de autenticación)
-    const usuarioAdminId = 1; // Reemplazar con el ID del usuario autenticado
-    formDataObj.append('usuario_admin_id', usuarioAdminId);
+    // 4. Agregar usuario_admin_id del usuario autenticado
+    console.log('👤 Usando ID de usuario autenticado:', usuarioAdminId.value)
+    formDataObj.append('usuario_admin_id', usuarioAdminId.value);
 
     // 5. Si es edición, agregar _method=PUT
     if (esEdicion.value) {
@@ -377,7 +392,7 @@ const guardarRestaurante = async () => {
     }, 500);
 
   } catch (error) {
-    console.error('Error al guardar:', error);
+    console.error('❌ Error al guardar:', error);
     guardando.value = false;
   }
 };

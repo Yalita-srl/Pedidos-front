@@ -1,156 +1,195 @@
 <template>
-  <aside
-    class="flex fixed inset-y-0 left-0 z-50 flex-col w-72 to-black transition-all duration-500 ease-in-out text-to-indigo-400 from-slate-900 lg:translate-x-0"
-    :class="{ 'w-20': isCollapsed, '-translate-x-full lg:translate-x-0': isMobile && isCollapsed }"
-  >
-    <!-- Header -->
-    <div class="flex justify-between items-center p-5 border-b border-slate-800">
-      <div class="flex overflow-hidden gap-3 items-center">
-        <div class="text-3xl text-indigo-400">
-          <i class="fas fa-utensils"></i>
-        </div>
-        <span
-          class="text-xl font-bold tracking-tight transition-opacity duration-300"
-          :class="{ 'opacity-0': isCollapsed }"
-        >
-          Mi Restaurante
-        </span>
-      </div>
+  <div>
+    <!-- Botón hamburguesa móvil (estilo claro) -->
+    <button
+      @click="toggleSidebar"
+      class="fixed top-4 left-4 p-3 bg-white rounded-xl shadow-lg transition-all duration-300 z-60 hover:shadow-xl lg:hidden"
+      :class="isCollapsed && isMobile ? 'left-4' : 'left-72'"
+    >
+      <i class="text-xl fas" :class="isCollapsed ? 'fa-bars' : 'fa-xmark'"></i>
+    </button>
 
-      <!-- Botón colapsar/expandir -->
-      <button
-        @click="toggleSidebar"
-        class="p-2 rounded-lg transition group"
-        :title="isCollapsed ? 'Expandir menú' : 'Colapsar menú'"
-      >
-        <i
-          class="text-lg transition-transform duration-300 fas"
-          :class="isCollapsed ? 'fa-chevron-right group-hover:translate-x-1' : 'fa-chevron-left group-hover:-translate-x-1'"
-        ></i>
-      </button>
-    </div>
+    <!-- Overlay móvil -->
+    <div
+      v-if="isMobile && !isCollapsed"
+      @click="isCollapsed = true"
+      class="fixed inset-0 z-40 bg-black/10 lg:hidden"
+    ></div>
 
-    <!-- Menú -->
-    <nav class="overflow-y-auto flex-1 px-4 py-6">
-      <ul class="space-y-2">
-        <!-- Dashboard -->
-        <li>
-          <router-link
-            to=""
-            class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all group"
-            active-class="font-semibold from-indigo-600 to-indigo-700 shadow-lg shadow-indigo-500/30"
-            
-          >
-            <i class="w-6 text-center text-indigo-400 fas fa-tachometer-alt"></i>
-            <span :class="{ 'opacity-0': isCollapsed }">Dashboard</span>
-          </router-link>
-        </li>
-
-        <!-- Mis Restaurantes -->
-        <li>
-          <router-link
-            to="/mis-restaurantes"
-            class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all group"
-            active-class="font-semibold bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-lg shadow-indigo-500/30"
-            
-          >
-            <i class="w-6 text-center text-indigo-400 fas fa-store"></i>
-            <span :class="{ 'opacity-0': isCollapsed }">Mis Restaurantes</span>
-          </router-link>
-        </li>
-
-        <!-- Pedidos -->
-        <li>
-          <router-link
-            to=""
-            class="flex justify-between items-center px-4 py-3 rounded-xl transition-all group"
-            active-class="font-semibold bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-lg shadow-indigo-500/30"
-            
-          >
-            <div class="flex gap-4 items-center">
-              <i class="w-6 text-center text-indigo-400 fas fa-shopping-bag"></i>
-              <span :class="{ 'opacity-0': isCollapsed }">Pedidos</span>
-            </div>
-            <span
-              v-if="pedidosPendientes > 0 && !isCollapsed"
-              class="px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse"
-            >
-              {{ pedidosPendientes }}
-            </span>
-          </router-link>
-        </li>
-
-        <!-- Productos -->
-        <li>
-          <router-link
-            to="/restaurantes/productos"
-            class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all group"
-            active-class="font-semibold bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-lg shadow-indigo-500/30"
-            
-          >
-            <i class="w-6 text-center text-indigo-400 fas fa-box-open"></i>
-            <span :class="{ 'opacity-0': isCollapsed }">Productos</span>
-          </router-link>
-        </li>
-
-        <!-- Categorías -->
-        <li>
-          <router-link
-            to="/restaurantes/categorias"
-            class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all group"
-            active-class="font-semibold bg-gradient-to-r from-indigo-600 to-indigo-700 shadow-lg shadow-indigo-500/30"
-            
-          >
-            <i class="w-6 text-center text-indigo-400 fas fa-tags"></i>
-            <span :class="{ 'opacity-0': isCollapsed }">Categorías</span>
-          </router-link>
-        </li>
-      </ul>
-    </nav>
-
-    <!-- Footer: Usuario + Logout -->
-    <div class="p-5 border-t border-slate-800">
-      <div class="flex justify-between items-center">
+    <!-- Sidebar con estilo claro -->
+    <aside
+      class="flex fixed inset-y-0 left-0 z-50 flex-col w-72 bg-white border-r border-gray-200 shadow-2xl transition-all duration-300 lg:translate-x-0"
+      :class="{ 
+        'w-20': isCollapsed,
+        '-translate-x-full lg:translate-x-0': isMobile && isCollapsed 
+      }"
+      style="border-radius: 0 24px 24px 0;"
+    >
+      <!-- Header -->
+      <div class="flex justify-between items-center p-5 border-b border-gray-200">
         <div class="flex overflow-hidden gap-3 items-center">
-          <div class="text-4xl text-indigo-400">
-            <i class="fas fa-user-circle"></i>
+          <div class="flex justify-center items-center w-14 h-14 text-2xl font-bold text-white bg-red-500 rounded-full shadow-lg">
+            {{ iniciales }}
           </div>
-          <div :class="{ 'opacity-0': isCollapsed }" class="transition-opacity">
-            <p class="text-sm font-semibold">{{ userName }}</p>
-            <p class="text-xs text-slate-400">Administrador</p>
+          <div
+            class="transition-opacity duration-300"
+            :class="{ 'opacity-0': isCollapsed }"
+          >
+            <p class="font-bold text-gray-800">{{ userName }}</p>
+            <p class="text-sm text-gray-500">{{ userRoleFormatted }}</p>
           </div>
         </div>
 
+        <!-- Botón colapsar (solo desktop) -->
         <button
-          @click="cerrarSesion"
-          class="p-2.5 text-red-400 rounded-lg transition hover:bg-red-900/50 hover:text-red-300"
-          title="Cerrar sesión"
+          @click="toggleSidebar"
+          class="hidden p-2 rounded-lg transition lg:flex hover:bg-gray-100"
+          :title="isCollapsed ? 'Expandir' : 'Colapsar'"
         >
-          <i class="text-xl fas fa-sign-out-alt"></i>
+          <i
+            class="text-lg transition-transform duration-300 fas"
+            :class="isCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'"
+          ></i>
         </button>
       </div>
-    </div>
-  </aside>
 
-  <!-- Overlay móvil -->
-  <div
-    v-if="isMobile && !isCollapsed"
-    @click="isCollapsed = true"
-    class="fixed inset-0 z-40 bg-black/50 lg:hidden"
-  ></div>
+      <!-- Menú -->
+      <nav class="overflow-y-auto flex-1 p-4">
+        <ul class="space-y-2">
+          <!-- Dashboard -->
+          <li>
+            <router-link
+              to="/dashboard"
+              class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all hover:bg-gray-100 group"
+              active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+              exact-active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+            >
+              <i class="w-6 text-center text-red-500 fas fa-tachometer-alt"></i>
+              <span :class="{ 'opacity-0': isCollapsed }">Dashboard</span>
+            </router-link>
+          </li>
+
+          <!-- Mis Restaurantes -->
+          <li>
+            <router-link
+              to="/mis-restaurantes"
+              class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all hover:bg-gray-100 group"
+              active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+            >
+              <i class="w-6 text-center text-red-500 fas fa-store"></i>
+              <span :class="{ 'opacity-0': isCollapsed }">Mis Restaurantes</span>
+            </router-link>
+          </li>
+
+          <!-- Pedidos -->
+          <li>
+            <router-link
+              to="/pedidos"
+              class="flex justify-between items-center px-4 py-3 rounded-xl transition-all hover:bg-gray-100 group"
+              active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+            >
+              <div class="flex gap-4 items-center">
+                <i class="w-6 text-center text-red-500 fas fa-shopping-bag"></i>
+                <span :class="{ 'opacity-0': isCollapsed }">Pedidos</span>
+              </div>
+              <span
+                v-if="pedidosPendientes > 0 && !isCollapsed"
+                class="px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-full"
+              >
+                {{ pedidosPendientes }}
+              </span>
+            </router-link>
+          </li>
+
+          <!-- Productos -->
+          <li>
+            <router-link
+              to="/restaurantes/productos"
+              class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all hover:bg-gray-100 group"
+              active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+            >
+              <i class="w-6 text-center text-red-500 fas fa-box-open"></i>
+              <span :class="{ 'opacity-0': isCollapsed }">Productos</span>
+            </router-link>
+          </li>
+
+          <!-- Categorías -->
+          <li>
+            <router-link
+              to="/restaurantes/categorias"
+              class="flex gap-4 items-center px-4 py-3 rounded-xl transition-all hover:bg-gray-100 group"
+              active-class="font-semibold text-red-600 bg-red-50 shadow-sm"
+            >
+              <i class="w-6 text-center text-red-500 fas fa-tags"></i>
+              <span :class="{ 'opacity-0': isCollapsed }">Categorías</span>
+            </router-link>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Footer: Cerrar sesión -->
+      <div class="p-5 border-t border-gray-200">
+        <button
+          @click="cerrarSesion"
+          class="flex gap-4 items-center px-4 py-3 w-full rounded-xl transition-all hover:bg-red-50 group"
+          :class="{ 'justify-center': isCollapsed }"
+        >
+          <i class="text-xl text-red-600 fas fa-sign-out-alt group-hover:text-red-700"></i>
+          <span
+            class="font-medium text-red-600 transition-opacity duration-300 group-hover:text-red-700"
+            :class="{ 'opacity-0': isCollapsed }"
+          >
+            Cerrar Sesión
+          </span>
+        </button>
+      </div>
+    </aside>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
 
 const router = useRouter()
+const authStore = useAuthStore() // Usar el store
 
 const isCollapsed = ref(false)
 const isMobile = ref(window.innerWidth <= 1024)
-
-const userName = ref('Juan Pérez')
 const pedidosPendientes = ref(7)
+
+// Computed para el nombre del usuario desde el store
+const userName = computed(() => {
+  return authStore.user?.name || 'Usuario'
+})
+
+// Computed para el rol formateado
+const userRoleFormatted = computed(() => {
+  const role = authStore.user?.role
+  if (!role) return 'Usuario'
+  
+  switch(role.toLowerCase()) {
+    case 'restaurant_owner':
+      return 'Propietario'
+    case 'admin':
+      return 'Administrador'
+    case 'user':
+      return 'Cliente'
+    default:
+      return 'Usuario'
+  }
+})
+
+// Iniciales para el avatar circular
+const iniciales = computed(() => {
+  return userName.value
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2)
+})
 
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
@@ -159,18 +198,21 @@ const toggleSidebar = () => {
 const handleResize = () => {
   isMobile.value = window.innerWidth <= 1024
   if (isMobile.value) isCollapsed.value = true
+  else isCollapsed.value = false
 }
 
 const cerrarSesion = () => {
   if (confirm('¿Cerrar sesión?')) {
-    localStorage.removeItem('token')
-    router.push('/login')
+    authStore.logout() // Usar el logout del store en lugar de manipular localStorage directamente
   }
 }
 
 onMounted(() => {
   handleResize()
   window.addEventListener('resize', handleResize)
+  
+  // Debug: Verificar datos del usuario
+  console.log('👤 Datos del usuario en sidebar:', authStore.user)
 })
 
 onUnmounted(() => {
@@ -178,9 +220,9 @@ onUnmounted(() => {
 })
 </script>
 
-<!-- Solo una clase personalizada para el gradiente del botón activo -->
 <style scoped>
-.bg-gradient-to-r.from-indigo-600.to-indigo-700 {
-  background: linear-gradient(to right, #4f46e5, #4338ca);
+/* Bordes redondeados en el sidebar (como el segundo componente) */
+aside {
+  border-radius: 0 24px 24px 0;
 }
 </style>

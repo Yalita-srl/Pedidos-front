@@ -202,6 +202,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
 import { 
   getRestaurantesPorUsuarioAdmin, 
   deleteRestaurante, 
@@ -212,6 +213,8 @@ import AdminSidebar from '@/components/restaurante/AdiminSidebar.vue'
 import RestauranteModal from '@/components/restaurante/RestauranteModal.vue'
 
 const router = useRouter()
+const authStore = useAuthStore() // Usar el store de autenticación
+
 const restaurantes = ref([])
 const loading = ref(true)
 const error = ref('')
@@ -219,7 +222,10 @@ const successMessage = ref('')
 const mostrarModal = ref(false)
 const restauranteEditando = ref(null)
 
-const usuarioAdminId = ref(1) // Cambiar por el usuario autenticado
+// Obtener el ID del usuario autenticado desde el store
+const usuarioAdminId = computed(() => {
+  return authStore.user?.id || null
+})
 
 // Computed properties para estadísticas
 const restaurantesAbiertos = computed(() => {
@@ -235,9 +241,17 @@ const totalProductos = computed(() => {
 })
 
 const cargarRestaurantes = async () => {
+  // Verificar que tenemos un usuario autenticado
+  if (!usuarioAdminId.value) {
+    error.value = 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'
+    loading.value = false
+    return
+  }
+
   loading.value = true
   error.value = ''
   try {
+    console.log('🔄 Cargando restaurantes para usuario ID:', usuarioAdminId.value)
     const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId.value)
     restaurantes.value = response.data || []
 
@@ -246,7 +260,7 @@ const cargarRestaurantes = async () => {
       setTimeout(() => successMessage.value = '', 3000)
     }
   } catch (err) {
-    console.error(err)
+    console.error('❌ Error al cargar restaurantes:', err)
     error.value = 'Error al cargar los restaurantes. Intenta nuevamente.'
   } finally {
     loading.value = false
@@ -284,7 +298,7 @@ const guardarRestaurante = async ({ formData, id }) => {
       response = await createRestaurante(formData);
     }
     
-    console.log('Operación exitosa:', response.data);
+    console.log('✅ Operación exitosa:', response.data);
     cargarRestaurantes(); // Actualizar la lista
     
     // Mostrar mensaje de éxito
@@ -294,7 +308,7 @@ const guardarRestaurante = async ({ formData, id }) => {
     });
     
   } catch (error) {
-    console.error('Error al guardar el restaurante:', error);
+    console.error('❌ Error al guardar el restaurante:', error);
     
     // Mostrar mensaje de error
     showNotification({
@@ -338,7 +352,11 @@ const cambiarEstado = async (restaurante) => {
   }
 }
 
-onMounted(cargarRestaurantes)
+onMounted(() => {
+  console.log('👤 Usuario autenticado:', authStore.user)
+  console.log('🆔 ID del usuario:', usuarioAdminId.value)
+  cargarRestaurantes()
+})
 </script>
 
 <style scoped>

@@ -33,8 +33,8 @@
         <div v-else>
           <!-- Estadísticas rápidas -->
           <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-4">
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Total Restaurantes</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ restaurantes.length }}</p>
@@ -45,8 +45,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Total Categorías</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ totalCategorias }}</p>
@@ -57,8 +57,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Restaurantes Activos</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ restaurantesAbiertos }}</p>
@@ -69,8 +69,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Sin Categorías</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ restaurantesSinCategorias }}</p>
@@ -85,33 +85,33 @@
           <!-- Lista de restaurantes -->
           <div class="space-y-6">
             <div v-for="restaurante in restaurantes" :key="restaurante.id" 
-                 class="overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-200">
+                 class="overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-lg">
               
               <!-- Header del restaurante -->
-              <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+              <div class="p-6 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div class="flex items-center gap-4">
+                  <div class="flex gap-4 items-center">
                     <div class="flex-shrink-0">
-                      <div v-if="restaurante.imagen" class="w-16 h-16 overflow-hidden rounded-xl">
+                      <div v-if="restaurante.imagen" class="overflow-hidden w-16 h-16 rounded-xl">
                         <img :src="restaurante.imagen_url" :alt="restaurante.nombre" 
                              class="object-cover w-full h-full">
                       </div>
-                      <div v-else class="flex items-center justify-center w-16 h-16 bg-gray-100 rounded-xl">
+                      <div v-else class="flex justify-center items-center w-16 h-16 bg-gray-100 rounded-xl">
                         <i class="text-2xl text-gray-400 fas fa-store"></i>
                       </div>
                     </div>
                     <div>
                       <h3 class="text-xl font-bold text-gray-800">{{ restaurante.nombre }}</h3>
                       <div class="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
-                        <div class="flex items-center gap-1">
+                        <div class="flex gap-1 items-center">
                           <i class="fas fa-map-marker-alt"></i>
                           <span>{{ restaurante.direccion }}</span>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex gap-1 items-center">
                           <i class="fas fa-phone"></i>
                           <span>{{ restaurante.telefono }}</span>
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex gap-1 items-center">
                           <i class="fas fa-circle" :class="restaurante.estado === 'Abierto' ? 'text-green-500' : 'text-red-500'"></i>
                           <span>{{ restaurante.estado }}</span>
                         </div>
@@ -120,10 +120,10 @@
                   </div>
                   
                   <div class="flex gap-3">
-                    <span class="px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
+                    <span class="px-3 py-1 text-sm font-medium text-blue-800 bg-blue-100 rounded-full">
                       {{ restaurante.categorias.length }} categorías
                     </span>
-                    <span class="px-3 py-1 text-sm font-medium bg-green-100 text-green-800 rounded-full">
+                    <span class="px-3 py-1 text-sm font-medium text-green-800 bg-green-100 rounded-full">
                       {{ restaurante.productos.length }} productos
                     </span>
                   </div>
@@ -135,7 +135,7 @@
                 <div class="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
                   <h4 class="text-lg font-semibold text-gray-800">Categorías del Menú</h4>
                   <button @click="abrirModalCategoria(restaurante.id)" 
-                          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                          class="flex gap-2 items-center px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
                     <i class="fas fa-plus"></i>
                     Nueva Categoría
                   </button>
@@ -152,8 +152,8 @@
                 <!-- Grid de categorías -->
                 <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <div v-for="categoria in restaurante.categorias" :key="categoria.id"
-                       class="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 group">
-                    <div class="flex items-center gap-3">
+                       class="flex justify-between items-center p-4 rounded-xl border border-gray-200 hover:bg-gray-50 group">
+                    <div class="flex gap-3 items-center">
                       <div class="p-2 bg-indigo-100 rounded-lg">
                         <i class="text-indigo-600 fas fa-tag"></i>
                       </div>
@@ -165,14 +165,14 @@
                       </div>
                     </div>
                     
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div class="flex gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                       <button @click="editarCategoria(categoria, restaurante.id)"
-                              class="p-2 text-blue-600 transition rounded-lg hover:bg-blue-100"
+                              class="p-2 text-blue-600 rounded-lg transition hover:bg-blue-100"
                               title="Editar categoría">
                         <i class="fas fa-edit"></i>
                       </button>
                       <button @click="eliminarCategoria(categoria.id, restaurante.nombre)"
-                              class="p-2 text-red-600 transition rounded-lg hover:bg-red-100"
+                              class="p-2 text-red-600 rounded-lg transition hover:bg-red-100"
                               title="Eliminar categoría">
                         <i class="fas fa-trash"></i>
                       </button>
@@ -213,7 +213,7 @@
           </div>
 
           <div class="p-4 mt-4 bg-blue-50 rounded-xl">
-            <div class="flex items-center gap-3">
+            <div class="flex gap-3 items-center">
               <i class="text-blue-600 fas fa-info-circle"></i>
               <div>
                 <p class="text-sm font-medium text-blue-800">Restaurante:</p>
@@ -246,6 +246,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
 import AdminSidebar from '@/components/restaurante/AdiminSidebar.vue'
 import { 
   getRestaurantesPorUsuarioAdmin, 
@@ -253,6 +254,8 @@ import {
   updateCategoriaMenu, 
   deleteCategoriaMenu 
 } from '@/services/catalogoService'
+
+const authStore = useAuthStore() // Usar el store de autenticación
 
 // Estado principal
 const restaurantes = ref([])
@@ -270,6 +273,11 @@ const modalCategoria = reactive({
     nombre: '',
     descripcion: ''
   }
+})
+
+// Obtener el ID del usuario autenticado desde el store
+const usuarioAdminId = computed(() => {
+  return authStore.user?.id || null
 })
 
 // Computed properties
@@ -294,17 +302,22 @@ const nombreRestauranteSeleccionado = computed(() => {
 // Métodos
 const cargarRestaurantes = async () => {
   try {
+    // Verificar que tenemos un usuario autenticado
+    if (!usuarioAdminId.value) {
+      error.value = 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'
+      loading.value = false
+      return
+    }
+
     loading.value = true
     error.value = null
     
-    // Aquí necesitas obtener el ID del usuario admin desde tu store o localStorage
-    const usuarioAdminId = 1 // Reemplaza con la forma en que obtienes el ID del usuario
-    
-    const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId)
+    console.log('🔄 Cargando restaurantes para usuario ID:', usuarioAdminId.value)
+    const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId.value)
     restaurantes.value = response.data
     
   } catch (err) {
-    console.error('Error al cargar restaurantes:', err)
+    console.error('❌ Error al cargar restaurantes:', err)
     error.value = 'Error al cargar los restaurantes'
   } finally {
     loading.value = false
@@ -424,6 +437,8 @@ const contarProductosEnCategoriaPorId = (categoriaId) => {
 }
 
 onMounted(() => {
+  console.log('👤 Usuario autenticado:', authStore.user)
+  console.log('🆔 ID del usuario:', usuarioAdminId.value)
   cargarRestaurantes()
 })
 </script>

@@ -17,7 +17,7 @@
           <div class="flex gap-3">
             <!-- Filtro por disponibilidad -->
             <select v-model="filtroDisponible" 
-                    class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="todos">Todos los productos</option>
               <option value="disponible">Solo disponibles</option>
               <option value="no-disponible">No disponibles</option>
@@ -28,8 +28,8 @@
               <input type="text" 
                      v-model="terminoBusqueda"
                      placeholder="Buscar productos..."
-                     class="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <i class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 fas fa-search"></i>
+                     class="py-2 pr-4 pl-10 w-64 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <i class="absolute left-3 top-1/2 text-gray-400 transform -translate-y-1/2 fas fa-search"></i>
             </div>
           </div>
         </div>
@@ -52,8 +52,8 @@
         <div v-else>
           <!-- Estadísticas rápidas -->
           <div class="grid grid-cols-1 gap-6 mb-8 md:grid-cols-5">
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Total Productos</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ totalProductos }}</p>
@@ -64,8 +64,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Disponibles</p>
                   <p class="mt-1 text-2xl font-bold text-green-600">{{ productosDisponibles }}</p>
@@ -76,8 +76,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">No Disponibles</p>
                   <p class="mt-1 text-2xl font-bold text-red-600">{{ productosNoDisponibles }}</p>
@@ -88,8 +88,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Restaurantes</p>
                   <p class="mt-1 text-2xl font-bold text-gray-900">{{ restaurantesConProductos }}</p>
@@ -100,8 +100,8 @@
               </div>
             </div>
 
-            <div class="p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
-              <div class="flex items-center justify-between">
+            <div class="p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <div class="flex justify-between items-center">
                 <div>
                   <p class="text-sm font-medium text-gray-600">Valor Total</p>
                   <p class="mt-1 text-2xl font-bold text-amber-600">Bs. {{ valorTotalInventario }}</p>
@@ -114,14 +114,14 @@
           </div>
 
           <!-- Filtros avanzados -->
-          <div class="p-6 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100">
+          <div class="p-6 mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <h3 class="text-lg font-semibold text-gray-800">Filtros Avanzados</h3>
               
               <div class="flex flex-wrap gap-4">
                 <!-- Filtro por restaurante -->
                 <select v-model="filtroRestaurante" 
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                   <option value="todos">Todos los restaurantes</option>
                   <option v-for="rest in restaurantes" :key="rest.id" :value="rest.id">
                     {{ rest.nombre }}
@@ -130,7 +130,7 @@
 
                 <!-- Filtro por categoría -->
                 <select v-model="filtroCategoria" 
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                   <option value="todas">Todas las categorías</option>
                   <option v-for="cat in categoriasUnicas" :key="cat.id" :value="cat.id">
                     {{ cat.nombre }}
@@ -139,7 +139,7 @@
 
                 <!-- Filtro por precio -->
                 <select v-model="filtroPrecio" 
-                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        class="px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                   <option value="todos">Todos los precios</option>
                   <option value="0-10">Bs. 0 - 10</option>
                   <option value="10-25">Bs. 10 - 25</option>
@@ -149,7 +149,7 @@
 
                 <!-- Botón limpiar filtros -->
                 <button @click="limpiarFiltros" 
-                        class="px-4 py-2 text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200">
+                        class="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg border border-gray-300 hover:bg-gray-200">
                   <i class="fas fa-times"></i> Limpiar
                 </button>
               </div>
@@ -157,16 +157,16 @@
 
             <!-- Info de filtros activos -->
             <div v-if="filtrosActivos" class="flex flex-wrap gap-2 mt-4">
-              <span class="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">
+              <span class="px-3 py-1 text-sm text-blue-800 bg-blue-100 rounded-full">
                 {{ productosFiltrados.length }} productos encontrados
               </span>
-              <span v-if="filtroRestaurante !== 'todos'" class="px-3 py-1 text-sm bg-green-100 text-green-800 rounded-full">
+              <span v-if="filtroRestaurante !== 'todos'" class="px-3 py-1 text-sm text-green-800 bg-green-100 rounded-full">
                 Restaurante: {{ nombreRestauranteFiltro }}
               </span>
-              <span v-if="filtroCategoria !== 'todas'" class="px-3 py-1 text-sm bg-purple-100 text-purple-800 rounded-full">
+              <span v-if="filtroCategoria !== 'todas'" class="px-3 py-1 text-sm text-purple-800 bg-purple-100 rounded-full">
                 Categoría: {{ nombreCategoriaFiltro }}
               </span>
-              <span v-if="filtroDisponible !== 'todos'" class="px-3 py-1 text-sm bg-amber-100 text-amber-800 rounded-full">
+              <span v-if="filtroDisponible !== 'todos'" class="px-3 py-1 text-sm text-amber-800 bg-amber-100 rounded-full">
                 {{ filtroDisponible === 'disponible' ? 'Solo disponibles' : 'Solo no disponibles' }}
               </span>
             </div>
@@ -185,7 +185,7 @@
           <!-- Grid de productos -->
           <div v-else class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <div v-for="producto in productosFiltrados" :key="producto.id"
-                 class="overflow-hidden bg-white rounded-2xl shadow-lg transition hover:shadow-2xl hover:-translate-y-2 border border-gray-200">
+                 class="overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-lg transition hover:shadow-2xl hover:-translate-y-2">
               
               <!-- Imagen del producto -->
               <div class="overflow-hidden relative h-48 bg-gray-100">
@@ -198,7 +198,7 @@
                 </div>
                 
                 <!-- Badges -->
-                <div class="absolute top-3 left-3 flex flex-col gap-2">
+                <div class="flex absolute top-3 left-3 flex-col gap-2">
                   <span :class="producto.disponible ? 'bg-green-500' : 'bg-red-500'"
                         class="px-2 py-1 text-xs font-medium text-white rounded-full">
                     {{ producto.disponible ? 'Disponible' : 'No disponible' }}
@@ -222,12 +222,12 @@
                 <p class="mt-2 text-sm text-gray-600 line-clamp-2">{{ producto.descripcion || 'Sin descripción' }}</p>
                 
                 <!-- Información del restaurante -->
-                <div class="flex items-center gap-2 mt-3 p-3 bg-gray-50 rounded-lg">
-                  <div class="flex-shrink-0 w-8 h-8 overflow-hidden rounded-full">
+                <div class="flex gap-2 items-center p-3 mt-3 bg-gray-50 rounded-lg">
+                  <div class="overflow-hidden flex-shrink-0 w-8 h-8 rounded-full">
                     <img v-if="obtenerRestaurante(producto.restaurante_id)?.imagen"
                          :src="getImagenUrl(obtenerRestaurante(producto.restaurante_id)?.imagen)"
                          class="object-cover w-full h-full" />
-                    <div v-else class="flex items-center justify-center w-full h-full bg-gray-200">
+                    <div v-else class="flex justify-center items-center w-full h-full bg-gray-200">
                       <i class="text-xs text-gray-500 fas fa-store"></i>
                     </div>
                   </div>
@@ -244,11 +244,11 @@
                 <!-- Acciones -->
                 <div class="flex gap-2 mt-4">
                   <button @click="editarProducto(producto)"
-                          class="flex-1 flex gap-2 justify-center items-center py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg transition hover:bg-blue-200">
+                          class="flex flex-1 gap-2 justify-center items-center py-2 text-sm font-medium text-blue-700 bg-blue-100 rounded-lg transition hover:bg-blue-200">
                     <i class="fas fa-edit"></i> Editar
                   </button>
                   <button @click="verRestaurante(producto.restaurante_id)"
-                          class="flex-1 flex gap-2 justify-center items-center py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg transition hover:bg-gray-200">
+                          class="flex flex-1 gap-2 justify-center items-center py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg transition hover:bg-gray-200">
                     <i class="fas fa-external-link-alt"></i> Ver
                   </button>
                 </div>
@@ -259,13 +259,13 @@
           <!-- Paginación (opcional) -->
           <div v-if="productosFiltrados.length > 12" class="flex justify-center mt-8">
             <div class="flex gap-2">
-              <button class="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button class="px-4 py-2 text-gray-600 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
                 Anterior
               </button>
-              <button class="px-4 py-2 text-white bg-blue-600 border border-blue-600 rounded-lg">
+              <button class="px-4 py-2 text-white bg-blue-600 rounded-lg border border-blue-600">
                 1
               </button>
-              <button class="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+              <button class="px-4 py-2 text-gray-600 bg-white rounded-lg border border-gray-300 hover:bg-gray-50">
                 Siguiente
               </button>
             </div>
@@ -298,11 +298,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // Importar el store de autenticación
 import AdminSidebar from '@/components/restaurante/AdiminSidebar.vue'
 import ProductoModal from '@/components/restaurante/ProductoModal.vue'
 import { getRestaurantesPorUsuarioAdmin } from '@/services/catalogoService'
 
 const router = useRouter()
+const authStore = useAuthStore() // Usar el store de autenticación
 
 // Estado principal
 const restaurantes = ref([])
@@ -320,6 +322,11 @@ const terminoBusqueda = ref('')
 // Modal de producto
 const mostrarModalProducto = ref(false)
 const productoSeleccionado = ref(null)
+
+// Obtener el ID del usuario autenticado desde el store
+const usuarioAdminId = computed(() => {
+  return authStore.user?.id || null
+})
 
 // Computed properties
 const todosLosProductos = computed(() => {
@@ -433,17 +440,22 @@ const nombreCategoriaFiltro = computed(() => {
 // Métodos
 const cargarRestaurantes = async () => {
   try {
+    // Verificar que tenemos un usuario autenticado
+    if (!usuarioAdminId.value) {
+      error.value = 'No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'
+      loading.value = false
+      return
+    }
+
     loading.value = true
     error.value = null
     
-    // Aquí necesitas obtener el ID del usuario admin desde tu store o localStorage
-    const usuarioAdminId = 1 // Reemplaza con la forma en que obtienes el ID del usuario
-    
-    const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId)
+    console.log('🔄 Cargando restaurantes para usuario ID:', usuarioAdminId.value)
+    const response = await getRestaurantesPorUsuarioAdmin(usuarioAdminId.value)
     restaurantes.value = response.data
     
   } catch (err) {
-    console.error('Error al cargar restaurantes:', err)
+    console.error('❌ Error al cargar restaurantes:', err)
     error.value = 'Error al cargar los productos'
   } finally {
     loading.value = false
@@ -511,6 +523,8 @@ const verRestaurante = (restauranteId) => {
 }
 
 onMounted(() => {
+  console.log('👤 Usuario autenticado:', authStore.user)
+  console.log('🆔 ID del usuario:', usuarioAdminId.value)
   cargarRestaurantes()
 })
 </script>
