@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import RestaurantesLista from '@/views/cliente/RestaurantesLista.vue'
-import RestauranteForm from '@/components/restaurante/RestauranteForm.vue'
+import RestauranteForm from '@/components/restaurante/RestauranteModal.vue'
 import PaymentView from '@/views/cliente/PaymentView.vue'
 import Login from '@/views/Login.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -25,12 +25,12 @@ const routes = [
     component: PaymentView,
     meta: { requiresAuth: true }
   },
-  
-  // Rutas para administración de restaurantes
+
+  // Rutas para dueños/restaurantes
   {
     path: '/mis-restaurantes',
     name: 'RestaurantesAdmin',
-    component: () => import('@/views/restaurante/Menu.vue'),
+    component: () => import('@/views/restaurante/Restaurantes.vue'),
     meta: { requiresAuth: true }
   },
   {
@@ -49,31 +49,45 @@ const routes = [
   {
     path: '/restaurantes/:id/productos',
     name: 'RestauranteProductos',
-    component: () => import('@/views/restaurante/RestauranteProductos.vue'),
+    component: () => import('@/views/restaurante/Productos.vue'),
     props: true,
     meta: { requiresAuth: true }
   },
-  
+  {
+    path: '/restaurantes/categorias',
+    name: 'GestionCategorias',
+    component: () => import('@/views/restaurante/Categorias.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/restaurantes/productos',
+    name: 'VistaProductos',
+    component: () => import('@/views/restaurante/TodosProductos.vue'),
+    meta: { requiresAuth: true }
+  },
+
+  // Login
   {
     path: '/login',
     name: 'Login',
     component: Login
   },
 
+  // Perfil del usuario
   {
-    path: "/perfil",
-    name: "Perfil",
-    component: () => import("@/views/cliente/ProfileView.vue"),
+    path: '/perfil',
+    name: 'Perfil',
+    component: () => import('@/views/cliente/ProfileView.vue'),
     meta: { requiresAuth: true }
   },
   {
-    path: "/mis-compras",
-    name: "MisCompras",
-    component: () => import("@/views/cliente/OrdersView.vue"),
+    path: '/mis-compras',
+    name: 'MisCompras',
+    component: () => import('@/views/cliente/OrdersView.vue'),
     meta: { requiresAuth: true }
   },
 
-  // RUTAS DEL PANEL DE ADMINISTRACIÓN
+  // Panel de administración (ROLE = ADMIN)
   {
     path: '/admin/dashboard',
     name: 'admin-dashboard',
@@ -89,7 +103,7 @@ const routes = [
   {
     path: '/admin/usuarios',
     name: 'admin-usuarios',
-    component: () => import('@/views/admin/AdminUsuarios.vue'),
+    component: () => import('@/views/admin/Usuarios.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
@@ -110,8 +124,8 @@ const routes = [
     component: () => import('@/views/admin/Configuracion.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
-  
-  // Redirección para /admin
+
+  // Redirección por defecto
   {
     path: '/admin',
     redirect: '/admin/dashboard'
@@ -123,32 +137,35 @@ const router = createRouter({
   routes
 })
 
+// 🔥 Middlewares de navegación
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
-  // Si el usuario está autenticado y va al login, redirigir según su rol
+  // Si ya está logueado e intenta ir al login → redirigir según rol
   if (to.name === 'Login' && authStore.isAuthenticated) {
     if (authStore.user?.role === 'ADMIN') {
-      next({ name: 'admin-dashboard' })
+      return next({ name: 'admin-dashboard' })
     } else {
-      next({ name: 'Restaurantes' })
+      return next({ name: 'Restaurantes' })
     }
   }
-  // Si un ADMIN va a la ruta raíz, redirigir al dashboard
-  else if (to.name === 'Restaurantes' && authStore.isAuthenticated && authStore.user?.role === 'ADMIN') {
-    next({ name: 'admin-dashboard' })
+
+  // Si ADMIN entra en "/" → enviarlo al dashboard
+  if (to.name === 'Restaurantes' && authStore.isAuthenticated && authStore.user?.role === 'ADMIN') {
+    return next({ name: 'admin-dashboard' })
   }
-  // Si la ruta requiere autenticación y el usuario no está autenticado
-  else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'Login' })
-  } 
-  // Si la ruta requiere ser admin y el usuario no es admin
-  else if (to.meta.requiresAdmin && authStore.user?.role !== 'ADMIN') {
-    next({ name: 'Restaurantes' })
+
+  // Requiere autenticación
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return next({ name: 'Login' })
   }
-  else {
-    next()
+
+  // Requiere rol ADMIN
+  if (to.meta.requiresAdmin && authStore.user?.role !== 'ADMIN') {
+    return next({ name: 'Restaurantes' })
   }
+
+  next()
 })
 
 export default router

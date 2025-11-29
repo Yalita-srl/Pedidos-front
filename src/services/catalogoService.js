@@ -91,7 +91,13 @@ export const getProducto = (productoId) => {
  * Actualizar un producto
  */
 export const updateProducto = (productoId, productoData) => {
-  return api.put(`/productos/${productoId}`, productoData);
+  productoData.append('_method', 'PUT')
+  
+  return api.post(`/productos/${productoId}`, productoData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };
 
 /**
@@ -113,8 +119,12 @@ export const getRestaurantes = () => {
 /**
  * Crear un nuevo restaurante
  */
-export const createRestaurante = (restauranteData) => {
-  return api.post('/restaurantes', restauranteData);
+export const createRestaurante = (formData) => {
+  return api.post('/restaurantes', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };
 
 /**
@@ -151,8 +161,17 @@ export const getRestaurante = async (restauranteId) => {
 /**
  * Actualizar un restaurante
  */
-export const updateRestaurante = (restauranteId, restauranteData) => {
-  return api.put(`/restaurantes/${restauranteId}`, restauranteData);
+export const updateRestaurante = (id, formData) => {
+  // Asegurarse de que _method=PUT esté incluido
+  if (!formData.get('_method')) {
+    formData.append('_method', 'PUT');
+  }
+  
+  return api.post(`/restaurantes/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
 };
 
 /**

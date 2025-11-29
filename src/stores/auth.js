@@ -9,14 +9,32 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
 
   const isAuthenticated = computed(() => !!token.value)
+  const userRole = computed(() => user.value?.role || null)
 
+  // Función para determinar la ruta según el rol
+  function getRouteByRole(role) {
+    console.log('🎭 Determinando ruta para rol:', role)
+
+    const normalizedRole = role?.toString().toLowerCase().trim()
+    console.log('🎭 Rol normalizado:', normalizedRole)
+
+    switch (normalizedRole) {
+      case 'admin':
+        return '/admin/dashboard'
+      case 'restaurant_owner':
+        return '/mis-restaurantes'
+      case 'user':
+      default:
+        return '/'
+    }
+  }
+
+  // LOGIN
   async function login(email, password) {
     try {
       const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query: `
             mutation tokenAuth($email: String!, $password: String!) {
@@ -31,10 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
               }
             }
           `,
-          variables: {
-            email,
-            password,
-          },
+          variables: { email, password },
         }),
       })
 
@@ -45,32 +60,33 @@ export const useAuthStore = defineStore('auth', () => {
       }
 
       const { token: authToken, user: userData } = result.data.tokenAuth
-      
+
+      console.log('🔐 Datos del usuario:', userData)
+      console.log('🎭 Rol del usuario:', userData.role)
+
       token.value = authToken
       user.value = userData
 
-      // REDIRECCIÓN SEGÚN ROL
-      if (router) {
-        if (userData.role === 'ADMIN') {
-          router.push('/admin/dashboard')
-        } else {
-          router.push('/')
-        }
+      if (router && userData.role) {
+        const targetRoute = getRouteByRole(userData.role)
+        console.log('🎯 Redirigiendo a:', targetRoute)
+        router.push(targetRoute)
+      } else {
+        router.push('/')
       }
-      
+
     } catch (error) {
-      console.error('Error de autenticación:', error)
+      console.error('❌ Error de autenticación:', error)
       throw error
     }
   }
 
+  // REGISTER
   async function register({ email, password, name, phone, address, role = "user" }) {
     try {
       const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: `
             mutation RegisterUser($input: UserInput!) {
@@ -85,14 +101,7 @@ export const useAuthStore = defineStore('auth', () => {
             }
           `,
           variables: {
-            input: {
-              email,
-              password,
-              name,
-              phone,
-              address,
-              role, 
-            },
+            input: { email, password, name, phone, address, role },
           },
         }),
       })
@@ -103,7 +112,6 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error(result.errors[0].message)
       }
 
-      // usuario creado correctamente
       return result.data.registerUser.user
 
     } catch (error) {
@@ -112,15 +120,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // LOGOUT
   function logout() {
     token.value = null
     user.value = null
+
     if (router) {
       router.push('/login')
     }
   }
 
-  return { token, user, isAuthenticated, login, logout, register }
+  return {
+    token,
+    user,
+    isAuthenticated,
+    userRole,
+    login,
+    logout,
+    register,
+    getRouteByRole
+  }
 }, {
   persist: true,
 })
