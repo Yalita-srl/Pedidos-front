@@ -2,9 +2,10 @@
   <NotificationProvider />
   <div id="app" class="h-screen flex overflow-hidden">
     
-    <!-- SIDEBAR FIJO -->
-    <div class="w-72">
-      <NavBarUser v-if="auth.isAuthenticated" />
+    <!-- SIDEBAR CONDICIONAL POR ROL -->
+    <div class="w-72" v-if="auth.isAuthenticated">
+      <NavBarAdmin v-if="auth.user?.role === 'ADMIN'" />
+      <NavBarUser v-else />
     </div>
     
     <!-- CONTENIDO DINÁMICO -->
@@ -12,10 +13,11 @@
       <router-view />
     </div>
     
-    <!-- CARRITO -->
+    <!-- CARRITO (solo para clientes) -->
     <CarritoSidebar
-    @realizar-pedido="procesarPedidoGlobal"
-    class="absolute top-0 right-0 z-50"
+      v-if="auth.isAuthenticated && auth.user?.role !== 'ADMIN'"
+      @realizar-pedido="procesarPedidoGlobal"
+      class="absolute top-0 right-0 z-50"
     />
     
   </div>
@@ -25,6 +27,7 @@
 import { useAuthStore } from "@/stores/auth";
 import CarritoSidebar from '@/components/cliente/Carrito.vue';
 import NavBarUser from '@/components/cliente/NavBarUser.vue';
+import NavBarAdmin from '@/components/admin/NavBarAdmin.vue';
 import NotificationProvider from "@/components/NotificationProvider.vue";
 
 export default {
@@ -32,10 +35,17 @@ export default {
   components: {
     CarritoSidebar,
     NavBarUser,
+    NavBarAdmin,
     NotificationProvider, 
   },
   setup() {
     const auth = useAuthStore();
+
+    console.log("📌 App montado, usuario:",{
+      isAuthenticated: auth.isAuthenticated,
+      user: auth.user,
+      role: auth.user?.role || 'N/A'
+    });
     return { auth };
   },
   methods: {
