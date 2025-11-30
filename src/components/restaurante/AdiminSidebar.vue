@@ -36,7 +36,8 @@
             :class="{ 'opacity-0': isCollapsed }"
           >
             <p class="font-bold text-gray-800">{{ userName }}</p>
-            <p class="text-sm text-gray-500">{{ userRoleFormatted }}</p>
+            <p class="text-sm text-gray-500">Propietario</p>
+            <p class="text-sm text-gray-500">{{ authStore.user.email }}</p>
           </div>
         </div>
 
@@ -202,9 +203,7 @@ const handleResize = () => {
 }
 
 const cerrarSesion = () => {
-  if (confirm('¿Cerrar sesión?')) {
-    authStore.logout() // Usar el logout del store en lugar de manipular localStorage directamente
-  }
+  authStore.logout()
 }
 
 onMounted(() => {

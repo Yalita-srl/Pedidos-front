@@ -59,6 +59,7 @@
         </div>
         <div>
           <p class="font-semibold text-gray-800">{{ userData.nombre }}</p>
+          <p class="text-sm text-gray-500">User</p>
           <p class="text-sm text-gray-500">{{ userData.email }}</p>
         </div>
       </div>

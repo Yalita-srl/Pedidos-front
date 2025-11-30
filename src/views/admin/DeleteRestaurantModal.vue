@@ -26,13 +26,27 @@
 
       <div class="mb-6">
         <p class="text-gray-700 text-lg mb-4">
-          ¿Estás seguro de que deseas eliminar el usuario? 
+          ¿Estás seguro de que deseas eliminar el restaurante? 
         </p>
         <p class="text-gray-600 text-sm">
           Esta acción es permanente y no se puede deshacer. 
-          Se eliminarán todos los datos asociados al usuario.
+          Se eliminarán todos los datos asociados al restaurante.
         </p>
       </div>
+
+      <!-- Información del restaurante -->
+      <!-- <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          </svg>
+          <div class="text-sm">
+            <p class="font-semibold text-red-800">Restaurante a eliminar:</p>
+            <p class="text-red-700">{{ restaurant?.nombre }}</p>
+            <p class="text-red-600 text-xs mt-1">ID: {{ restaurant?.id }}</p>
+          </div>
+        </div>
+      </div> -->
 
       <div class="flex justify-end gap-4">
         <button
@@ -48,7 +62,8 @@
           @click="handleDelete"
           class="px-6 py-3 rounded-xl font-bold text-white shadow-lg
                  bg-linear-to-r from-red-600 to-red-500
-                 hover:from-red-700 hover:to-red-600 transition"
+                 hover:from-red-700 hover:to-red-600 transition
+                 disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="loading"
         >
           <span v-if="!loading">Eliminar Permanentemente</span>
@@ -64,38 +79,59 @@
 
 <script setup>
 import { ref } from "vue";
-import { deleteUser } from "@/services/userService";
+import { deleteRestaurante } from "@/services/catalogoService";
 import useNotification from "@/composables/useNotification";
 
-const props = defineProps({ user: Object });
-const emit = defineEmits(["close"]);
+const props = defineProps({ 
+  restaurant: {
+    type: Object,
+    required: true
+  }
+});
+
+const emit = defineEmits(["close", "deleted"]);
 const { push } = useNotification();
 
 const loading = ref(false);
 
 const handleDelete = async () => {
+  // Verificar que tenemos el restaurante
+  if (!props.restaurant || !props.restaurant.id) {
+    push({
+      type: "error",
+      message: "No se pudo identificar el restaurante a eliminar.",
+    });
+    return;
+  }
+
   loading.value = true;
+  
   try {
-    await deleteUser(props.user.id);
+    console.log('🗑️ Eliminando restaurante ID:', props.restaurant.id);
+    await deleteRestaurante(props.restaurant.id);
     
     push({
-        type: "success",
-        message: `Usuario ${props.user.name} eliminado correctamente.`,
+      type: "success",
+      message: `Restaurante "${props.restaurant.nombre}" eliminado correctamente.`,
     });
     
     closeModal();
+    emit("deleted");
+    
   } catch (err) {
-    console.error("Error al eliminar usuario:", err);
+    console.error("❌ Error al eliminar restaurante:", err);
     push({
-        type: "error",
-        message: err.message || "Error al eliminar usuario.",
+      type: "error",
+      message: err.response?.data?.message || "Error al eliminar restaurante.",
     });
   } finally {
     loading.value = false;
   }
 };
 
-const closeModal = () => emit("close");
+const closeModal = () => {
+  emit("close");
+};
 </script>
 
 <style scoped>

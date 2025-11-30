@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed top-4 right-4 z-[20000] pointer-events-none">
+  <div class="fixed top-4 right-4 z-20000 pointer-events-none">
     <transition-group name="notif" tag="div" class="flex flex-col gap-3">
       
       <div
@@ -7,7 +7,7 @@
         :key="note.id"
         class="pointer-events-auto w-80 px-4 py-3 rounded-lg shadow-lg"
         :class="[
-          'bg-gray-700 text-white',
+          'bg-green-700 text-white',
           'flex items-start justify-between'
         ]"
       >
@@ -23,7 +23,7 @@
         </div>
 
         <!-- Botón cerrar -->
-        <button @click="close(note.id)" class="text-white/60 hover:text-white">
+        <button @click="close(note.id)" class="text-white hover:text-white">
           ✕
         </button>
 
