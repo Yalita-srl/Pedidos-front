@@ -81,7 +81,7 @@
         </router-link>
 
         <!-- Categorías -->
-        <router-link
+        <!-- <router-link
           to="/admin/categorias"
           class="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 transition text-gray-700 font-medium"
           active-class="bg-red-50 text-red-600"
@@ -89,7 +89,7 @@
         >
           <TagIcon class="w-6 h-6 text-red-500" />
           Categorías
-        </router-link>
+        </router-link> -->
 
         <!-- Usuarios -->
         <router-link
