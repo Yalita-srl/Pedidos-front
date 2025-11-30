@@ -109,7 +109,7 @@ const routes = [
   {
     path: '/admin/restaurantes',
     name: 'admin-restaurantes',
-    component: () => import('@/views/admin/Restaurantes.vue'),
+    component: () => import('@/views/admin/AdminRestaurantes.vue'),
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
