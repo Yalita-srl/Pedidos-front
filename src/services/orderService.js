@@ -70,3 +70,10 @@ export async function eliminarOrden(id) {
   const { data } = await api.delete(`/${id}`);
   return data;
 }
+//----------------------------------------------------------
+// GET ALL ORDERS (ADMIN)
+//----------------------------------------------------------
+export async function obtenerTodasLasOrdenes() {
+  const { data } = await api.get(`/`);
+  return data;
+}
