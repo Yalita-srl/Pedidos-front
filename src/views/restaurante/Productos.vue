@@ -310,7 +310,7 @@ const formatoPrecio = (precio) => {
   return Number(precio).toFixed(2);
 };
 
-const getImagenUrl = (filename) => `http://localhost:8000/storage/${filename}`;
+const getImagenUrl = (filename) => `http://localhost/api/catalogo/storage/${filename}`;
 
 const cargarDatos = async () => {
   loading.value = true;

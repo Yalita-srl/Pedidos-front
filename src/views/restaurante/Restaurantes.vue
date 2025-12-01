@@ -66,8 +66,10 @@
           <!-- Imagen -->
           <div class="relative h-48 overflow-hidden bg-gray-100">
             <img
-              v-if="restaurante.imagen_url"
-              :src="restaurante.imagen_url"
+              v-if="restaurante.imagen"
+              :src="getImagenUrl(restaurante.imagen)"
+
+             
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               @error="e => e.target.src = '/placeholder-restaurant.jpg'"
             />
@@ -166,6 +168,9 @@ import RestauranteModal from '@/components/restaurante/RestauranteModal.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+
+const getImagenUrl = (filename) => `http://localhost/api/catalogo/storage/${filename}`;
+
 
 const restaurantes = ref([])
 const loading = ref(true)

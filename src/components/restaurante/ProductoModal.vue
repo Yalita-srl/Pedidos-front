@@ -206,7 +206,7 @@ const onFileChange = (e) => {
 
 const getImagenUrl = (img) => {
   if (!img) return ''
-  return `http://localhost:8000/storage/${img}`
+  return `http://localhost/api/catalogo/storage/${img}`
 }
 
 const guardar = async () => {

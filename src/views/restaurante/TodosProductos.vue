@@ -430,7 +430,7 @@ const obtenerNombreCategoria = (categoriaId) => {
 
 const getImagenUrl = (filename) => {
   if (!filename) return ''
-  return `http://localhost:8000/storage/${filename}`
+  return `http://localhost/api/catalogo/storage/${filename}`
 }
 
 const formatoPrecio = (precio) => {
