@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
   // LOGIN
   async function login(email, password) {
     try {
-      const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
+      const response = await fetch(import.meta.env.VITE_USER_API + "/graphql" || "http://localhost:8080/graphql", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -84,7 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
   // REGISTER
   async function register({ email, password, name, phone, address, role = "user" }) {
     try {
-      const response = await fetch(import.meta.env.VITE_USER_API || "http://localhost:8080/graphql", {
+      const response = await fetch(import.meta.env.VITE_USER_API + "/graphql" || "http://localhost:8080/graphql", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

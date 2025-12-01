@@ -41,7 +41,7 @@ export async function getUserProfile(id) {
     }
   `;
 
-  const { data } = await api.post("/graphql", {
+  const { data } = await api.post("graphql", {
     query,
     variables: { id }
   });
@@ -80,7 +80,7 @@ export async function updateUserProfile(id, input) {
     }
   `;
 
-  const { data } = await api.post("/graphql", {
+  const { data } = await api.post("graphql", {
     query: mutation,
     variables: { id, input: cleanInput }
   });
@@ -109,7 +109,7 @@ export async function getAllUsers(page = 1, limit = 10) {
     }
   `;
 
-  const { data } = await api.post("/graphql", {
+  const { data } = await api.post("graphql", {
     query,
     variables: { page, limit }
   });
@@ -138,7 +138,7 @@ export async function registerUser(input) {
     }
   `;
 
-  const { data } = await api.post("/graphql", {
+  const { data } = await api.post("graphql", {
     query: mutation,
     variables: { input }
   });
